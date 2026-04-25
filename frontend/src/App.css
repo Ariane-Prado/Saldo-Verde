@@ -1,0 +1,121 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f6fafb;
+  color: #222;
+}
+
+.pagina {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.cabecalho {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.cabecalho h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.cabecalho p {
+  margin-top: 8px;
+  color: #6b7280;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.card-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.input-arquivo {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f3f3f7;
+  border: none;
+  margin-bottom: 16px;
+}
+
+.botao {
+  width: 100%;
+  border: none;
+  background: #111827;
+  color: white;
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.botao:hover {
+  opacity: 0.9;
+}
+
+.resultado h2 {
+  margin-bottom: 16px;
+}
+
+.abas {
+  display: flex;
+  background: #f2f2f5;
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.abas button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.abas .ativo {
+  background: white;
+}
+
+.json-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.json-box {
+  background: #111827;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 10px;
+  min-height: 150px;
+}
+
+.observacao {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #6b7280;
+}
