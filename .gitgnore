@@ -1,6 +1,15 @@
+# Node
 node_modules/
 dist/
-.env
+
+# Python
+venv/
 __pycache__/
 *.pyc
+
+# Uploads
+uploads/
+
+# Sistema
 .DS_Store
+.env
