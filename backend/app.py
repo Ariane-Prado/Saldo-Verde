@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
+from ai_agent import extrair_dados_nota_fiscal
 
 app = Flask(__name__)
 CORS(app)
@@ -27,9 +28,13 @@ def extrair():
     caminho = os.path.join(UPLOAD_FOLDER, filename)
     file.save(caminho)
 
+    # Chama o agente de IA para extrair os dados
+    dados = extrair_dados_nota_fiscal(caminho)
+
     return jsonify({
-        "mensagem": "Arquivo recebido",
-        "arquivo": filename
+        "mensagem": "Arquivo processado com sucesso",
+        "arquivo": filename,
+        "dados": dados
     })
 
 if __name__ == "__main__":
