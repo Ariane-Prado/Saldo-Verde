@@ -18,7 +18,7 @@ def extrair_dados_nota_fiscal(caminho_arquivo):
 
     try:
         # Carrega o modelo
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel("gemini-2.0-flash")
 
         # Lê o arquivo
         with open(caminho_arquivo, "rb") as f:

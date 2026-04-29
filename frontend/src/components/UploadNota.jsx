@@ -1,33 +1,57 @@
 import { useState } from "react";
 import "../App.css";
 
+const API = "http://localhost:8000";
+
 export default function UploadNota() {
   const [arquivo, setArquivo] = useState(null);
+  const [carregando, setCarregando] = useState(false);
+  const [resultado, setResultado] = useState(null);
+  const [erro, setErro] = useState(null);
+  const [copiado, setCopiado] = useState(false);
 
-  function selecionarArquivo(event) {
-    console.log("Arquivo selecionado:", event.target.files[0]);
-    setArquivo(event.target.files[0]);
+  function selecionarArquivo(e) {
+    setArquivo(e.target.files[0] || null);
+    setResultado(null);
+    setErro(null);
   }
 
   async function extrairDados() {
-    console.log("Botão clicado");
-
     if (!arquivo) {
-      console.log("Nenhum arquivo selecionado");
       alert("Selecione um PDF primeiro.");
       return;
     }
 
+    setCarregando(true);
+    setErro(null);
+    setResultado(null);
+
     const formData = new FormData();
     formData.append("file", arquivo);
 
-    const resposta = await fetch("http://localhost:8000/extrair", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const resposta = await fetch(`${API}/extrair`, {
+        method: "POST",
+        body: formData,
+      });
+      const json = await resposta.json();
 
-    const dados = await resposta.json();
-    console.log("Resposta do backend:", dados);
+      if (json.erro) {
+        setErro(json.erro);
+      } else {
+        setResultado(json.dados);
+      }
+    } catch {
+      setErro("Erro ao conectar com o servidor. Verifique se o backend está rodando na porta 8000.");
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  async function copiarJSON() {
+    await navigator.clipboard.writeText(JSON.stringify(resultado, null, 2));
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2000);
   }
 
   return (
@@ -44,7 +68,6 @@ export default function UploadNota() {
         </div>
 
         <label className="label">Selecione o arquivo PDF da nota fiscal</label>
-
         <input
           className="input-arquivo"
           type="file"
@@ -52,10 +75,42 @@ export default function UploadNota() {
           onChange={selecionarArquivo}
         />
 
-        <button className="botao" onClick={extrairDados}>
-          ⟳ EXTRAIR DADOS
+        {arquivo && (
+          <div className="arquivo-info">
+            <span>📄 {arquivo.name}</span>
+            <span className="arquivo-tamanho">
+              {(arquivo.size / (1024 * 1024)).toFixed(2)} MB
+            </span>
+          </div>
+        )}
+
+        <button className="botao" onClick={extrairDados} disabled={carregando}>
+          {carregando ? "⏳ Processando..." : "⟳ EXTRAIR DADOS"}
         </button>
       </section>
+
+      {erro && (
+        <section className="card card--erro">
+          <p>❌ {erro}</p>
+        </section>
+      )}
+
+      {resultado && (
+        <section className="card">
+          <div className="json-topo">
+            <span className="json-label">&lt;/&gt; Dados em JSON</span>
+            <button className="botao-copiar" onClick={copiarJSON}>
+              {copiado ? "✓ Copiado!" : "📋 Copiar JSON"}
+            </button>
+          </div>
+          <div className="json-box">
+            <pre>{JSON.stringify(resultado, null, 2)}</pre>
+          </div>
+          <p className="observacao">
+            * Dados extraídos automaticamente pelo Gemini. Verifique antes de utilizar.
+          </p>
+        </section>
+      )}
     </main>
   );
 }
