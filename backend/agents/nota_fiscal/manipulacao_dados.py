@@ -1,11 +1,12 @@
 import os
 import json
 import base64
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import anthropic
 from openai import OpenAI
 from dotenv import load_dotenv
-import PyPDF2
+import pypdf
 
 load_dotenv()
 
@@ -13,7 +14,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-genai.configure(api_key=GEMINI_API_KEY)
+gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
 PROMPT = """
 Você é um especialista em leitura de Notas Fiscais brasileiras e classificação de despesas agrícolas.
@@ -86,17 +87,16 @@ def limpar_json(texto):
     return texto
 
 def extrair_com_gemini(caminho_arquivo):
-    model = genai.GenerativeModel("gemini-2.5-flash")
     extensao = os.path.splitext(caminho_arquivo)[1].lower()
     mime_type = "application/pdf" if extensao == ".pdf" else "image/jpeg"
 
     with open(caminho_arquivo, "rb") as f:
         conteudo = f.read()
 
-    response = model.generate_content([
-        PROMPT,
-        {"mime_type": mime_type, "data": conteudo}
-    ])
+    response = gemini_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=[PROMPT, types.Part.from_bytes(data=conteudo, mime_type=mime_type)]
+    )
     return json.loads(limpar_json(response.text))
 
 def extrair_com_claude(caminho_arquivo):
@@ -135,7 +135,7 @@ def extrair_com_openai(caminho_arquivo):
 
     if extensao == ".pdf":
         with open(caminho_arquivo, "rb") as f:
-            reader = PyPDF2.PdfReader(f)
+            reader = pypdf.PdfReader(f)
             texto = "\n".join(
                 page.extract_text() for page in reader.pages if page.extract_text()
             )

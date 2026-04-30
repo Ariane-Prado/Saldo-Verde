@@ -1,8 +1,8 @@
 flask
 flask-cors
 python-dotenv
-PyPDF2
-google-generativeai
+pypdf
+google-genai
 psycopg2-binary
 anthropic
 openai
