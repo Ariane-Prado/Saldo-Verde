@@ -108,10 +108,21 @@ body {
 
 .json-box {
   background: #111827;
+  color: #f8f8f2;
   border-radius: 8px;
   padding: 20px;
   margin-top: 10px;
   min-height: 150px;
+  overflow-x: auto;
+}
+
+.json-box pre {
+  margin: 0;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .observacao {
