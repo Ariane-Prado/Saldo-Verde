@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
-from ai_agent import extrair_dados_nota_fiscal
+from agents.nota_fiscal.consulta_dados import extrair_dados_nota_fiscal
 
 app = Flask(__name__)
 CORS(app)

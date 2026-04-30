@@ -16,37 +16,65 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 
 PROMPT = """
-Você é um especialista em leitura de Notas Fiscais brasileiras.
-Analise o documento e extraia as seguintes informações no formato JSON:
+Você é um especialista em leitura de Notas Fiscais brasileiras e classificação de despesas agrícolas.
+
+Analise o documento e extraia as informações abaixo. Além disso, interprete os produtos/serviços da nota e classifique a despesa conforme as categorias definidas.
+
+Retorne APENAS o JSON abaixo, sem blocos de código ou explicações. Se não encontrar algum campo, deixe como null.
 
 {
-    "emitente": {
-        "nome_razao_social": "string",
-        "cnpj": "string",
-        "endereco": "string"
-    },
-    "destinatario": {
-        "nome_razao_social": "string",
+    "fornecedor": {
+        "razao_social": "string",
+        "fantasia": "string",
         "cnpj": "string"
     },
-    "nota_fiscal": {
-        "numero": "string",
-        "serie": "string",
-        "data_emissao": "string"
+    "faturado": {
+        "nome_completo": "string",
+        "cpf": "string"
     },
-    "valor_total": float,
-    "itens": [
+    "numero_nota_fiscal": "string",
+    "data_emissao": "string",
+    "descricao_produtos": "string",
+    "parcelas": [
         {
-            "descricao": "string",
-            "quantidade": float,
-            "valor_unitario": float,
-            "valor_total": float
+            "numero": 1,
+            "data_vencimento": "string",
+            "valor": float
+        }
+    ],
+    "valor_total": float,
+    "classificacao_despesa": [
+        {
+            "categoria": "string",
+            "subcategoria": "string",
+            "justificativa": "string"
         }
     ]
 }
 
-Retorne APENAS o JSON, sem blocos de código ou explicações.
-Se não encontrar algum campo, deixe como null.
+INSTRUÇÕES:
+- "fornecedor" é quem emitiu a nota fiscal (vendedor/prestador).
+- "faturado" é o destinatário da nota (comprador/contratante). Se for pessoa jurídica e não houver CPF, deixe cpf como null.
+- "descricao_produtos" é um resumo textual dos produtos ou serviços da nota, sem necessidade de listar cada item separadamente.
+- "parcelas" deve ter estrutura para múltiplas parcelas, mas por padrão use apenas uma parcela com a data de vencimento e valor total da nota. Se a data de vencimento não constar na nota, deixe como null.
+- A classificação de despesa deve ser interpretada com base nos produtos/serviços, não extraída diretamente. Pode haver mais de uma classificação.
+
+CATEGORIAS E SUBCATEGORIAS DISPONÍVEIS:
+
+- INSUMOS AGRÍCOLAS: Sementes | Fertilizantes | Defensivos Agrícolas | Corretivos
+- MANUTENÇÃO E OPERAÇÃO: Combustíveis e Lubrificantes | Peças e Componentes Mecânicos | Manutenção de Máquinas e Equipamentos | Pneus, Filtros e Correias | Ferramentas e Utensílios
+- RECURSOS HUMANOS: Mão de Obra Temporária | Salários e Encargos
+- SERVIÇOS OPERACIONAIS: Frete e Transporte | Colheita Terceirizada | Secagem e Armazenagem | Pulverização e Aplicação
+- INFRAESTRUTURA E UTILIDADES: Energia Elétrica | Arrendamento de Terras | Construções e Reformas | Materiais de Construção
+- ADMINISTRATIVAS: Honorários Contábeis, Advocatícios ou Agronômicos | Despesas Bancárias e Financeiras
+- SEGUROS E PROTEÇÃO: Seguro Agrícola | Seguro de Ativos (Máquinas/Veículos) | Seguro Prestamista
+- IMPOSTOS E TAXAS: ITR | IPTU | IPVA | INCRA-CCIR
+- INVESTIMENTOS: Aquisição de Máquinas e Implementos | Aquisição de Veículos | Aquisição de Imóveis | Infraestrutura Rural
+
+Exemplos de classificação:
+- Compra de Óleo Diesel → categoria: "MANUTENÇÃO E OPERAÇÃO", subcategoria: "Combustíveis e Lubrificantes"
+- Compra de Material Hidráulico → categoria: "INFRAESTRUTURA E UTILIDADES", subcategoria: "Materiais de Construção"
+- Compra de Herbicida → categoria: "INSUMOS AGRÍCOLAS", subcategoria: "Defensivos Agrícolas"
 """
 
 def limpar_json(texto):
@@ -81,7 +109,7 @@ def extrair_com_claude(caminho_arquivo):
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=1024,
+        max_tokens=2048,
         messages=[
             {
                 "role": "user",
@@ -131,24 +159,3 @@ def extrair_com_openai(caminho_arquivo):
         messages=messages,
     )
     return json.loads(limpar_json(response.choices[0].message.content))
-
-def extrair_dados_nota_fiscal(caminho_arquivo):
-    if GEMINI_API_KEY:
-        try:
-            return extrair_com_gemini(caminho_arquivo)
-        except Exception as e:
-            print(f"[Gemini falhou] {e} — tentando Claude...")
-
-    if ANTHROPIC_API_KEY and ANTHROPIC_API_KEY != "sua_chave_aqui":
-        try:
-            return extrair_com_claude(caminho_arquivo)
-        except Exception as e:
-            print(f"[Claude falhou] {e} — tentando OpenAI...")
-
-    if OPENAI_API_KEY:
-        try:
-            return extrair_com_openai(caminho_arquivo)
-        except Exception as e:
-            return {"erro": f"Todas as APIs falharam. Último erro (OpenAI): {str(e)}"}
-
-    return {"erro": "Nenhuma API disponível. Configure ao menos uma chave no .env"}

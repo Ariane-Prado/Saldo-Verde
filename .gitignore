@@ -2,6 +2,12 @@
 .env
 .env.*
 
+# Claude Code
+.claude/
+
+# Documentação interna
+explicacao_projeto.html
+
 # Python
 __pycache__/
 *.pyc

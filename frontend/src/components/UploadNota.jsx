@@ -3,6 +3,28 @@ import "../App.css";
 
 const API = "http://localhost:8000";
 
+const ORDEM_CAMPOS = [
+  "fornecedor",
+  "faturado",
+  "numero_nota_fiscal",
+  "data_emissao",
+  "descricao_produtos",
+  "parcelas",
+  "valor_total",
+  "classificacao_despesa",
+];
+
+function ordenarJSON(dados) {
+  const ordenado = {};
+  for (const campo of ORDEM_CAMPOS) {
+    if (campo in dados) ordenado[campo] = dados[campo];
+  }
+  for (const campo of Object.keys(dados)) {
+    if (!(campo in ordenado)) ordenado[campo] = dados[campo];
+  }
+  return ordenado;
+}
+
 export default function UploadNota() {
   const [arquivo, setArquivo] = useState(null);
   const [carregando, setCarregando] = useState(false);
@@ -104,7 +126,7 @@ export default function UploadNota() {
             </button>
           </div>
           <div className="json-box">
-            <pre>{JSON.stringify(resultado, null, 2)}</pre>
+            <pre>{JSON.stringify(ordenarJSON(resultado), null, 2)}</pre>
           </div>
           <p className="observacao">
             * Dados extraídos automaticamente pelo Gemini. Verifique antes de utilizar.
