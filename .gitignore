@@ -1,6 +1,10 @@
 # Variáveis de ambiente (chaves de API)
 .env
 .env.*
+env.env
+
+# macOS
+.DS_Store
 
 # Claude Code
 .claude/

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../App.css";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 const ORDEM_CAMPOS = [
   "fornecedor",
@@ -25,12 +25,117 @@ function ordenarJSON(dados) {
   return ordenado;
 }
 
+function fmtValor(v) {
+  if (v == null || v === "") return "—";
+  const n = Number(v);
+  if (Number.isNaN(n)) return String(v);
+  return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function ResumoEstruturado({ dados }) {
+  const f = dados.fornecedor ?? {};
+  const fat = dados.faturado ?? {};
+  const parcelas = Array.isArray(dados.parcelas) ? dados.parcelas : [];
+  const classif = Array.isArray(dados.classificacao_despesa)
+    ? dados.classificacao_despesa
+    : [];
+
+  return (
+    <div className="resumo-grid">
+      <div className="resumo-bloco">
+        <h3 className="resumo-titulo">Fornecedor</h3>
+        <p>
+          <span className="resumo-label">Razão social:</span>{" "}
+          {f.razao_social ?? "—"}
+        </p>
+        <p>
+          <span className="resumo-label">Fantasia:</span> {f.fantasia ?? "—"}
+        </p>
+        <p>
+          <span className="resumo-label">CNPJ:</span> {f.cnpj ?? "—"}
+        </p>
+      </div>
+      <div className="resumo-bloco">
+        <h3 className="resumo-titulo">Faturado</h3>
+        <p>
+          <span className="resumo-label">Nome:</span>{" "}
+          {fat.nome_completo ?? "—"}
+        </p>
+        <p>
+          <span className="resumo-label">CPF:</span> {fat.cpf ?? "—"}
+        </p>
+      </div>
+      <div className="resumo-bloco resumo-bloco--full">
+        <h3 className="resumo-titulo">Nota</h3>
+        <p>
+          <span className="resumo-label">Nº NF:</span>{" "}
+          {dados.numero_nota_fiscal ?? "—"}
+        </p>
+        <p>
+          <span className="resumo-label">Data emissão:</span>{" "}
+          {dados.data_emissao ?? "—"}
+        </p>
+        <p>
+          <span className="resumo-label">Valor total:</span>{" "}
+          {fmtValor(dados.valor_total)}
+        </p>
+        <p className="resumo-descricao">
+          <span className="resumo-label">Produtos/serviços:</span>{" "}
+          {dados.descricao_produtos ?? "—"}
+        </p>
+      </div>
+      {parcelas.length > 0 && (
+        <div className="resumo-bloco resumo-bloco--full">
+          <h3 className="resumo-titulo">Parcelas</h3>
+          <table className="resumo-tabela">
+            <thead>
+              <tr>
+                <th>Nº</th>
+                <th>Vencimento</th>
+                <th>Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {parcelas.map((p, i) => (
+                <tr key={i}>
+                  <td>{p?.numero ?? "—"}</td>
+                  <td>{p?.data_vencimento ?? "—"}</td>
+                  <td>{fmtValor(p?.valor)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {classif.length > 0 && (
+        <div className="resumo-bloco resumo-bloco--full">
+          <h3 className="resumo-titulo">Classificação de despesa</h3>
+          <ul className="resumo-lista-classif">
+            {classif.map((c, i) => (
+              <li key={i} className="resumo-item-classif">
+                <strong>{c?.categoria ?? "—"}</strong>
+                {c?.subcategoria != null && (
+                  <span className="resumo-sub"> · {c.subcategoria}</span>
+                )}
+                {c?.justificativa != null && (
+                  <p className="resumo-justif">{c.justificativa}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function UploadNota() {
   const [arquivo, setArquivo] = useState(null);
   const [carregando, setCarregando] = useState(false);
   const [resultado, setResultado] = useState(null);
   const [erro, setErro] = useState(null);
   const [copiado, setCopiado] = useState(false);
+  const [aba, setAba] = useState("resumo");
 
   function selecionarArquivo(e) {
     setArquivo(e.target.files[0] || null);
@@ -58,20 +163,37 @@ export default function UploadNota() {
       });
       const json = await resposta.json();
 
+      if (!resposta.ok) {
+        setErro(json.erro ?? `Erro HTTP ${resposta.status}`);
+        return;
+      }
+
       if (json.erro) {
         setErro(json.erro);
-      } else {
-        setResultado(json.dados);
+        return;
       }
+
+      const dados = json.dados;
+      if (dados && typeof dados === "object" && dados.erro) {
+        setErro(String(dados.erro));
+        return;
+      }
+
+      setResultado(dados);
+      setAba("resumo");
     } catch {
-      setErro("Erro ao conectar com o servidor. Verifique se o backend está rodando na porta 8000.");
+      setErro(
+        "Erro ao conectar com o servidor. Verifique se o backend está rodando na porta 8000."
+      );
     } finally {
       setCarregando(false);
     }
   }
 
   async function copiarJSON() {
-    await navigator.clipboard.writeText(JSON.stringify(resultado, null, 2));
+    await navigator.clipboard.writeText(
+      JSON.stringify(ordenarJSON(resultado), null, 2)
+    );
     setCopiado(true);
     setTimeout(() => setCopiado(false), 2000);
   }
@@ -80,7 +202,10 @@ export default function UploadNota() {
     <main className="pagina">
       <section className="cabecalho">
         <h1>Extração de Dados de Nota Fiscal</h1>
-        <p>Carregue um PDF de nota fiscal e extraia os dados automaticamente usando IA</p>
+        <p>
+          Carregue um PDF de nota fiscal e extraia os dados automaticamente
+          usando IA
+        </p>
       </section>
 
       <section className="card">
@@ -118,18 +243,48 @@ export default function UploadNota() {
       )}
 
       {resultado && (
-        <section className="card">
-          <div className="json-topo">
-            <span className="json-label">&lt;/&gt; Dados em JSON</span>
-            <button className="botao-copiar" onClick={copiarJSON}>
-              {copiado ? "✓ Copiado!" : "📋 Copiar JSON"}
+        <section className="card resultado">
+          <h2 className="resultado-titulo">Resultado da extração</h2>
+          <div className="abas" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={aba === "resumo"}
+              className={aba === "resumo" ? "ativo" : ""}
+              onClick={() => setAba("resumo")}
+            >
+              Resumo
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={aba === "json"}
+              className={aba === "json" ? "ativo" : ""}
+              onClick={() => setAba("json")}
+            >
+              JSON
             </button>
           </div>
-          <div className="json-box">
-            <pre>{JSON.stringify(ordenarJSON(resultado), null, 2)}</pre>
-          </div>
+
+          {aba === "resumo" && <ResumoEstruturado dados={resultado} />}
+
+          {aba === "json" && (
+            <>
+              <div className="json-topo">
+                <span className="json-label">&lt;/&gt; Dados em JSON</span>
+                <button type="button" className="botao-copiar" onClick={copiarJSON}>
+                  {copiado ? "✓ Copiado!" : "📋 Copiar JSON"}
+                </button>
+              </div>
+              <div className="json-box">
+                <pre>{JSON.stringify(ordenarJSON(resultado), null, 2)}</pre>
+              </div>
+            </>
+          )}
+
           <p className="observacao">
-            * Dados extraídos automaticamente pelo Gemini. Verifique antes de utilizar.
+            * Dados extraídos automaticamente por IA. Verifique antes de
+            utilizar.
           </p>
         </section>
       )}
