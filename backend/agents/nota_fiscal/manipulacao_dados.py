@@ -14,7 +14,13 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+gemini_client = None
+
+def _get_gemini_client():
+    global gemini_client
+    if gemini_client is None and GEMINI_API_KEY:
+        gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+    return gemini_client
 
 PROMPT = """
 Você é um especialista em leitura de Notas Fiscais brasileiras e classificação de despesas agrícolas.
@@ -93,7 +99,7 @@ def extrair_com_gemini(caminho_arquivo):
     with open(caminho_arquivo, "rb") as f:
         conteudo = f.read()
 
-    response = gemini_client.models.generate_content(
+    response = _get_gemini_client().models.generate_content(
         model="gemini-2.5-flash",
         contents=[PROMPT, types.Part.from_bytes(data=conteudo, mime_type=mime_type)]
     )

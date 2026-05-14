@@ -1,4 +1,17 @@
 from database import get_connection
+from datetime import datetime
+
+
+def _normalizar_data(valor):
+    """Converte DD/MM/YYYY para YYYY-MM-DD. Passa None sem alteracao."""
+    if not valor:
+        return None
+    for fmt in ("%d/%m/%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(str(valor).strip(), fmt).date().isoformat()
+        except ValueError:
+            continue
+    return valor  # retorna como está se não reconhecer o formato
 
 
 def buscar_fornecedor(cnpj):
@@ -90,7 +103,7 @@ def criar_movimento(dados):
                     dados.get("id_faturado"),
                     dados.get("id_classificacao"),
                     dados.get("valor_total"),
-                    dados.get("data_emissao"),
+                    _normalizar_data(dados.get("data_emissao")),
                 )
             )
             novo_id = cur.fetchone()[0]
@@ -110,7 +123,7 @@ def criar_parcela(id_mov, dados):
                 (
                     id_mov,
                     dados.get("identificacao"),
-                    dados.get("data_vencimento"),
+                    _normalizar_data(dados.get("data_vencimento")),
                     dados.get("valor"),
                 )
             )
