@@ -1,0 +1,37 @@
+-- Schema do banco de dados Saldo Verde
+-- 2ª Etapa: Tabelas para registro de movimentos financeiros
+
+CREATE TABLE IF NOT EXISTS PESSOAS (
+    id          SERIAL PRIMARY KEY,
+    tipo        VARCHAR(20) NOT NULL CHECK (tipo IN ('CLIENTE-FORNECEDOR', 'FATURADO')),
+    razao_social VARCHAR(200) NOT NULL,
+    cpf_cnpj    VARCHAR(20),
+    ativo       BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS CLASSIFICACAO (
+    id          SERIAL PRIMARY KEY,
+    tipo        VARCHAR(10) NOT NULL CHECK (tipo IN ('DESPESA', 'RECEITA')),
+    descricao   VARCHAR(200) NOT NULL,
+    ativo       BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS MOVIMENTOCONTAS (
+    id              SERIAL PRIMARY KEY,
+    tipo            VARCHAR(10) NOT NULL CHECK (tipo IN ('APAGAR', 'ARECEBER')),
+    id_fornecedor   INT REFERENCES PESSOAS(id),
+    id_faturado     INT REFERENCES PESSOAS(id),
+    id_classificacao INT REFERENCES CLASSIFICACAO(id),
+    valor_total     DECIMAL(15, 2) NOT NULL,
+    data_emissao    DATE NOT NULL,
+    ativo           BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS PARCELACONTAS (
+    id              SERIAL PRIMARY KEY,
+    id_movimento    INT NOT NULL REFERENCES MOVIMENTOCONTAS(id),
+    identificacao   VARCHAR(100) NOT NULL UNIQUE,
+    data_vencimento DATE,
+    valor           DECIMAL(15, 2) NOT NULL,
+    ativo           BOOLEAN NOT NULL DEFAULT TRUE
+);
