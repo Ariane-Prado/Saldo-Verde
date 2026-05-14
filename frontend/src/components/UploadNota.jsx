@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../App.css";
+import ResultadoAnalise from "./ResultadoAnalise";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -136,11 +137,14 @@ export default function UploadNota() {
   const [erro, setErro] = useState(null);
   const [copiado, setCopiado] = useState(false);
   const [aba, setAba] = useState("resumo");
+  const [analise, setAnalise] = useState(null);
+  const [analisando, setAnalisando] = useState(false);
 
   function selecionarArquivo(e) {
     setArquivo(e.target.files[0] || null);
     setResultado(null);
     setErro(null);
+    setAnalise(null);
   }
 
   async function extrairDados() {
@@ -181,12 +185,69 @@ export default function UploadNota() {
 
       setResultado(dados);
       setAba("resumo");
+
+      // --- 2ª ETAPA: chamar POST /analisar ---
+      await analisarDados(dados);
     } catch {
       setErro(
         "Erro ao conectar com o servidor. Verifique se o backend está rodando na porta 8000."
       );
     } finally {
       setCarregando(false);
+    }
+  }
+
+  async function analisarDados(dados) {
+    setAnalisando(true);
+    setAnalise(null);
+    try {
+      const f = dados.fornecedor ?? {};
+      const fat = dados.faturado ?? {};
+      const classif = Array.isArray(dados.classificacao_despesa)
+        ? dados.classificacao_despesa[0]
+        : {};
+      const parcelas = Array.isArray(dados.parcelas) ? dados.parcelas : [];
+
+      const body = {
+        fornecedor: {
+          razao_social: f.razao_social ?? f.fantasia ?? "",
+          cnpj: f.cnpj ?? "",
+        },
+        faturado: {
+          razao_social: fat.nome_completo ?? fat.razao_social ?? "",
+          cpf: fat.cpf ?? "",
+        },
+        despesa: {
+          descricao: classif?.categoria
+            ? `${classif.categoria}${classif.subcategoria ? " — " + classif.subcategoria : ""}`
+            : dados.descricao_produtos ?? "",
+        },
+        valor_total: Number(dados.valor_total) || 0,
+        data_emissao: dados.data_emissao ?? null,
+        parcelas: parcelas.map((p) => ({
+          numero: p.numero ?? 1,
+          data_vencimento: p.data_vencimento ?? null,
+          valor: Number(p.valor) || 0,
+        })),
+      };
+
+      const resp = await fetch(`${API}/analisar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const resultado = await resp.json();
+
+      if (!resp.ok) {
+        setErro(resultado.erro ?? `Erro na análise: HTTP ${resp.status}`);
+        return;
+      }
+
+      setAnalise(resultado);
+    } catch {
+      setErro("Erro ao conectar com /analisar. Verifique se o banco de dados está rodando.");
+    } finally {
+      setAnalisando(false);
     }
   }
 
@@ -288,6 +349,14 @@ export default function UploadNota() {
           </p>
         </section>
       )}
+
+      {analisando && (
+        <section className="card analise-loading">
+          <p>⏳ Analisando dados no banco de dados...</p>
+        </section>
+      )}
+
+      {analise && <ResultadoAnalise analise={analise} dados={resultado} />}
     </main>
   );
 }

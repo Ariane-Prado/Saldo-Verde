@@ -1,0 +1,57 @@
+
+services:
+  # --- Banco de Dados ---
+  postgres:
+    image: postgres:17-alpine
+    container_name: saldo-verde-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: saldo_verde
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # --- Backend (Flask) ---
+  backend:
+    build: ./backend
+    container_name: saldo-verde-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: saldo_verde
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # --- Frontend (Vite + Nginx) ---
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8000
+    container_name: saldo-verde-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
