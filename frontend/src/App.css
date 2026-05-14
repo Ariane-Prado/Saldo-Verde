@@ -75,6 +75,145 @@ body {
   opacity: 0.9;
 }
 
+.botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.card--erro {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.card--erro p {
+  margin: 0;
+  color: #991b1b;
+}
+
+.arquivo-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.arquivo-tamanho {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.botao-copiar {
+  width: auto;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #e5e7eb;
+  color: #111827;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.botao-copiar:hover {
+  background: #d1d5db;
+}
+
+.json-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+}
+
+.resultado-titulo {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.resumo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .resumo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.resumo-bloco {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.resumo-bloco--full {
+  grid-column: 1 / -1;
+}
+
+.resumo-bloco p {
+  margin: 6px 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.resumo-titulo {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: #111827;
+}
+
+.resumo-label {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.resumo-descricao {
+  margin-top: 10px !important;
+}
+
+.resumo-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.resumo-tabela th,
+.resumo-tabela td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.resumo-tabela th {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.resumo-lista-classif {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.resumo-item-classif {
+  margin-bottom: 12px;
+}
+
+.resumo-sub {
+  color: #4b5563;
+}
+
+.resumo-justif {
+  margin: 6px 0 0 !important;
+  font-size: 13px;
+  color: #6b7280;
+}
+
 .resultado h2 {
   margin-bottom: 16px;
 }
