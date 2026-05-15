@@ -57,6 +57,13 @@ def buscar_despesa(descricao):
     return {"existe": False}
 
 
+def _fetch_id(cur, contexto):
+    row = cur.fetchone()
+    if row is None:
+        raise RuntimeError(f"INSERT em {contexto} não retornou id")
+    return row[0]
+
+
 def criar_fornecedor(dados):
     with get_connection() as conn:
         with conn.cursor() as cur:
@@ -64,7 +71,7 @@ def criar_fornecedor(dados):
                 "INSERT INTO PESSOAS (tipo, razao_social, cpf_cnpj) VALUES ('CLIENTE-FORNECEDOR', %s, %s) RETURNING id",
                 (dados.get("razao_social"), dados.get("cnpj"))
             )
-            novo_id = cur.fetchone()[0]
+            novo_id = _fetch_id(cur, "PESSOAS/fornecedor")
         conn.commit()
     return novo_id
 
@@ -76,7 +83,7 @@ def criar_faturado(dados):
                 "INSERT INTO PESSOAS (tipo, razao_social, cpf_cnpj) VALUES ('FATURADO', %s, %s) RETURNING id",
                 (dados.get("razao_social"), dados.get("cpf"))
             )
-            novo_id = cur.fetchone()[0]
+            novo_id = _fetch_id(cur, "PESSOAS/faturado")
         conn.commit()
     return novo_id
 
@@ -88,7 +95,7 @@ def criar_despesa(descricao):
                 "INSERT INTO CLASSIFICACAO (tipo, descricao) VALUES ('DESPESA', %s) RETURNING id",
                 (descricao,)
             )
-            novo_id = cur.fetchone()[0]
+            novo_id = _fetch_id(cur, "CLASSIFICACAO")
         conn.commit()
     return novo_id
 
@@ -110,7 +117,7 @@ def criar_movimento(dados):
                     _normalizar_data(dados.get("data_emissao")),
                 )
             )
-            novo_id = cur.fetchone()[0]
+            novo_id = _fetch_id(cur, "MOVIMENTOCONTAS")
         conn.commit()
     return novo_id
 
@@ -131,6 +138,6 @@ def criar_parcela(id_mov, dados):
                     dados.get("valor"),
                 )
             )
-            novo_id = cur.fetchone()[0]
+            novo_id = _fetch_id(cur, "PARCELACONTAS")
         conn.commit()
     return novo_id

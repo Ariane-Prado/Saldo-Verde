@@ -6,3 +6,4 @@ google-genai
 psycopg2-binary
 anthropic
 openai
+gunicorn

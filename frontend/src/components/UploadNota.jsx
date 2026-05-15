@@ -115,9 +115,6 @@ function ResumoEstruturado({ dados }) {
             {classif.map((c, i) => (
               <li key={i} className="resumo-item-classif">
                 <strong>{c?.categoria ?? "—"}</strong>
-                {c?.subcategoria != null && (
-                  <span className="resumo-sub"> · {c.subcategoria}</span>
-                )}
                 {c?.justificativa != null && (
                   <p className="resumo-justif">{c.justificativa}</p>
                 )}
@@ -218,9 +215,7 @@ export default function UploadNota() {
           cpf: fat.cpf ?? "",
         },
         despesa: {
-          descricao: classif?.categoria
-            ? `${classif.categoria}${classif.subcategoria ? " — " + classif.subcategoria : ""}`
-            : dados.descricao_produtos ?? "",
+          descricao: classif?.categoria ?? dados.descricao_produtos ?? "",
         },
         valor_total: Number(dados.valor_total) || 0,
         data_emissao: dados.data_emissao ?? null,

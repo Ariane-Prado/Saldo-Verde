@@ -53,7 +53,6 @@ Retorne APENAS o JSON abaixo, sem blocos de código ou explicações. Se não en
     "classificacao_despesa": [
         {
             "categoria": "string",
-            "subcategoria": "string",
             "justificativa": "string"
         }
     ]
@@ -65,23 +64,24 @@ INSTRUÇÕES:
 - "descricao_produtos" é um resumo textual dos produtos ou serviços da nota, sem necessidade de listar cada item separadamente.
 - "parcelas" deve ter estrutura para múltiplas parcelas, mas por padrão use apenas uma parcela com a data de vencimento e valor total da nota. Se a data de vencimento não constar na nota, deixe como null.
 - A classificação de despesa deve ser interpretada com base nos produtos/serviços, não extraída diretamente. Pode haver mais de uma classificação.
+- Use apenas as categorias listadas abaixo, sem subcategorias.
 
-CATEGORIAS E SUBCATEGORIAS DISPONÍVEIS:
+CATEGORIAS DISPONÍVEIS:
 
-- INSUMOS AGRÍCOLAS: Sementes | Fertilizantes | Defensivos Agrícolas | Corretivos
-- MANUTENÇÃO E OPERAÇÃO: Combustíveis e Lubrificantes | Peças e Componentes Mecânicos | Manutenção de Máquinas e Equipamentos | Pneus, Filtros e Correias | Ferramentas e Utensílios
-- RECURSOS HUMANOS: Mão de Obra Temporária | Salários e Encargos
-- SERVIÇOS OPERACIONAIS: Frete e Transporte | Colheita Terceirizada | Secagem e Armazenagem | Pulverização e Aplicação
-- INFRAESTRUTURA E UTILIDADES: Energia Elétrica | Arrendamento de Terras | Construções e Reformas | Materiais de Construção
-- ADMINISTRATIVAS: Honorários Contábeis, Advocatícios ou Agronômicos | Despesas Bancárias e Financeiras
-- SEGUROS E PROTEÇÃO: Seguro Agrícola | Seguro de Ativos (Máquinas/Veículos) | Seguro Prestamista
-- IMPOSTOS E TAXAS: ITR | IPTU | IPVA | INCRA-CCIR
-- INVESTIMENTOS: Aquisição de Máquinas e Implementos | Aquisição de Veículos | Aquisição de Imóveis | Infraestrutura Rural
+- INSUMOS AGRÍCOLAS (sementes, fertilizantes, defensivos, corretivos)
+- MANUTENÇÃO E OPERAÇÃO (combustíveis, lubrificantes, peças, manutenção de máquinas, pneus, ferramentas)
+- RECURSOS HUMANOS (mão de obra, salários, encargos)
+- SERVIÇOS OPERACIONAIS (frete, transporte, colheita terceirizada, secagem, armazenagem, pulverização)
+- INFRAESTRUTURA E UTILIDADES (energia elétrica, arrendamento, construções, materiais de construção)
+- ADMINISTRATIVAS (honorários contábeis, advocatícios, agronômicos, despesas bancárias)
+- SEGUROS E PROTEÇÃO (seguro agrícola, seguro de ativos, seguro prestamista)
+- IMPOSTOS E TAXAS (ITR, IPTU, IPVA, INCRA-CCIR)
+- INVESTIMENTOS (aquisição de máquinas, veículos, imóveis, infraestrutura rural)
 
 Exemplos de classificação:
-- Compra de Óleo Diesel → categoria: "MANUTENÇÃO E OPERAÇÃO", subcategoria: "Combustíveis e Lubrificantes"
-- Compra de Material Hidráulico → categoria: "INFRAESTRUTURA E UTILIDADES", subcategoria: "Materiais de Construção"
-- Compra de Herbicida → categoria: "INSUMOS AGRÍCOLAS", subcategoria: "Defensivos Agrícolas"
+- Compra de Óleo Diesel → categoria: "MANUTENÇÃO E OPERAÇÃO"
+- Compra de Material Hidráulico → categoria: "INFRAESTRUTURA E UTILIDADES"
+- Compra de Herbicida → categoria: "INSUMOS AGRÍCOLAS"
 """
 
 def limpar_json(texto):
@@ -103,7 +103,11 @@ def extrair_com_gemini(caminho_arquivo):
         model="gemini-2.5-flash",
         contents=[PROMPT, types.Part.from_bytes(data=conteudo, mime_type=mime_type)]
     )
-    return json.loads(limpar_json(response.text))
+    raw = limpar_json(response.text)
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Gemini retornou JSON inválido: {e} | Resposta: {raw[:300]}")
 
 def extrair_com_claude(caminho_arquivo):
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -133,7 +137,11 @@ def extrair_com_claude(caminho_arquivo):
             }
         ],
     )
-    return json.loads(limpar_json(message.content[0].text))
+    raw = limpar_json(message.content[0].text)
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Claude retornou JSON inválido: {e} | Resposta: {raw[:300]}")
 
 def extrair_com_openai(caminho_arquivo):
     client = OpenAI(api_key=OPENAI_API_KEY)
@@ -164,4 +172,8 @@ def extrair_com_openai(caminho_arquivo):
         model="gpt-4o-mini",
         messages=messages,
     )
-    return json.loads(limpar_json(response.choices[0].message.content))
+    raw = limpar_json(response.choices[0].message.content)
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"OpenAI retornou JSON inválido: {e} | Resposta: {raw[:300]}")
