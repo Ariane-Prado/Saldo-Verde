@@ -100,7 +100,7 @@ function ResumoEstruturado({ dados }) {
               {parcelas.map((p, i) => (
                 <tr key={i}>
                   <td>{p?.numero ?? "—"}</td>
-                  <td>{p?.data_vencimento ?? "—"}</td>
+                  <td>{p?.data_vencimento ?? dados.data_emissao ?? "—"}</td>
                   <td>{fmtValor(p?.valor)}</td>
                 </tr>
               ))}
