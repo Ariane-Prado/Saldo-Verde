@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS MOVIMENTOCONTAS (
     id_faturado      INT REFERENCES PESSOAS(id),
     id_classificacao INT REFERENCES CLASSIFICACAO(id),
     valor_total      DECIMAL(15, 2) NOT NULL,
-    data_emissao     DATE NOT NULL,
+    data_emissao     DATE,
     ativo            BOOLEAN NOT NULL DEFAULT TRUE
 );
 

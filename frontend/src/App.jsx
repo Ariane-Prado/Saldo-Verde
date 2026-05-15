@@ -1,11 +1,8 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import UploudNota from './components/UploadNota'
+import UploadNota from './components/UploadNota'
 
 function App() {
-  return <UploudNota/>;
+  return <UploadNota/>;
 
 }
 

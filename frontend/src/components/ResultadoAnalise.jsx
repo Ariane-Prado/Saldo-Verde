@@ -1,14 +1,5 @@
 import "../App.css";
 
-/**
- * ResultadoAnalise - exibe o status de FORNECEDOR, FATURADO e DESPESA
- * com indicadores visuais verde (EXISTE) / vermelho (NAO EXISTE),
- * conforme exigido na 2a Etapa do projeto.
- *
- * Props:
- *   analise  - objeto retornado por POST /analisar
- *   dados    - dados extraidos da nota (para exibir nome/documento)
- */
 export default function ResultadoAnalise({ analise, dados }) {
   if (!analise) return null;
 
@@ -54,7 +45,7 @@ export default function ResultadoAnalise({ analise, dados }) {
 
   return (
     <div className="analise-container">
-      <h2 className="analise-header">Analise do Banco de Dados</h2>
+      <h2 className="analise-header">Análise do Banco de Dados</h2>
 
       <div className="analise-entidades">
         {entidades.map(function (ent) {
@@ -79,7 +70,7 @@ export default function ResultadoAnalise({ analise, dados }) {
               >
                 {existe(ent.resultado)
                   ? "EXISTE - ID: " + idExibido(ent.resultado)
-                  : "NAO EXISTE - CRIADO ID: " + idExibido(ent.resultado)}
+                  : "NÃO EXISTE - CRIADO ID: " + idExibido(ent.resultado)}
               </div>
             </div>
           );
@@ -91,7 +82,7 @@ export default function ResultadoAnalise({ analise, dados }) {
           <span className="analise-sucesso-icone">&#x2705;</span>
           <div>
             <p className="analise-sucesso-titulo">
-              Registro lancado com sucesso!
+              Registro lançado com sucesso!
             </p>
             <p className="analise-sucesso-detalhe">
               Movimento <strong>#{analise.movimento_id}</strong> criado

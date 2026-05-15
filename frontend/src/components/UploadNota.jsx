@@ -236,14 +236,14 @@ export default function UploadNota() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const resultado = await resp.json();
+      const respostaAnalise = await resp.json();
 
       if (!resp.ok) {
-        setErro(resultado.erro ?? `Erro na análise: HTTP ${resp.status}`);
+        setErro(respostaAnalise.erro ?? `Erro na análise: HTTP ${resp.status}`);
         return;
       }
 
-      setAnalise(resultado);
+      setAnalise(respostaAnalise);
     } catch {
       setErro("Erro ao conectar com /analisar. Verifique se o banco de dados está rodando.");
     } finally {

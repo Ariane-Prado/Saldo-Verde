@@ -93,13 +93,13 @@ def analisar():
             identificacao = f"MOV{id_movimento}-PARC{p.get('numero', 1)}"
             ultimo_id_parcela = repository.criar_parcela(id_movimento, {
                 "identificacao":   identificacao,
-                "data_vencimento": p.get("data_vencimento"),
+                "data_vencimento": p.get("data_vencimento") or data_emissao,
                 "valor":           p.get("valor", valor_total),
             })
     else:
         ultimo_id_parcela = repository.criar_parcela(id_movimento, {
             "identificacao":   f"MOV{id_movimento}-PARC1",
-            "data_vencimento": None,
+            "data_vencimento": data_emissao,
             "valor":           valor_total,
         })
 
@@ -114,4 +114,4 @@ def analisar():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=8000)
+    app.run(debug=True, host="0.0.0.0", port=8001)

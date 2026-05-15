@@ -15,6 +15,8 @@ def _normalizar_data(valor):
 
 
 def buscar_fornecedor(cnpj):
+    if not cnpj:
+        return {"existe": False}
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -28,6 +30,8 @@ def buscar_fornecedor(cnpj):
 
 
 def buscar_faturado(cpf):
+    if not cpf:
+        return {"existe": False}
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
