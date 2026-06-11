@@ -5,7 +5,7 @@
 -- PESSOAS: Armazena fornecedores (CLIENTE-FORNECEDOR) e faturados (FATURADO)
 CREATE TABLE IF NOT EXISTS PESSOAS (
     id           SERIAL PRIMARY KEY,
-    tipo         VARCHAR(20) NOT NULL CHECK (tipo IN ('CLIENTE-FORNECEDOR', 'FATURADO')),
+    tipo         VARCHAR(20) NOT NULL CHECK (tipo IN ('FORNECEDOR', 'CLIENTE', 'FATURADO')),
     razao_social VARCHAR(200) NOT NULL,
     cpf_cnpj     VARCHAR(20),
     ativo        BOOLEAN NOT NULL DEFAULT TRUE

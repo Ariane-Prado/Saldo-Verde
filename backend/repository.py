@@ -20,7 +20,7 @@ def buscar_fornecedor(cnpj):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, razao_social, cpf_cnpj FROM PESSOAS WHERE cpf_cnpj = %s AND tipo = 'CLIENTE-FORNECEDOR' AND ativo = TRUE",
+                "SELECT id, razao_social, cpf_cnpj FROM PESSOAS WHERE cpf_cnpj = %s AND tipo = 'FORNECEDOR' AND ativo = TRUE",
                 (cnpj,)
             )
             row = cur.fetchone()
@@ -68,7 +68,7 @@ def criar_fornecedor(dados):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO PESSOAS (tipo, razao_social, cpf_cnpj) VALUES ('CLIENTE-FORNECEDOR', %s, %s) RETURNING id",
+                "INSERT INTO PESSOAS (tipo, razao_social, cpf_cnpj) VALUES ('FORNECEDOR', %s, %s) RETURNING id",
                 (dados.get("razao_social"), dados.get("cnpj"))
             )
             novo_id = _fetch_id(cur, "PESSOAS/fornecedor")
