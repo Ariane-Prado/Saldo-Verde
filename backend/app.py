@@ -3,6 +3,7 @@ from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
 from agents.nota_fiscal.consulta_dados import extrair_dados_nota_fiscal
+from agents.rag.consulta_rag import consultar_rag_simples, consultar_rag_embeddings
 import repository
 
 app = Flask(__name__)
@@ -111,6 +112,25 @@ def analisar():
         "parcela_id":   ultimo_id_parcela,
         "sucesso":     True,
     })
+
+
+@app.route("/consultar", methods=["POST"])
+def consultar():
+    body = request.get_json(force=True)
+    pergunta = body.get("pergunta", "").strip()
+    modo = body.get("modo", "simples")
+
+    if not pergunta:
+        return jsonify({"erro": "Pergunta não informada"}), 400
+
+    try:
+        if modo == "embeddings":
+            resposta = consultar_rag_embeddings(pergunta)
+        else:
+            resposta = consultar_rag_simples(pergunta)
+        return jsonify({"resposta": resposta, "modo": modo})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
 
 
 if __name__ == "__main__":
