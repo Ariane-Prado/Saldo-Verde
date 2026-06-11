@@ -47,13 +47,13 @@ export default function ConsultaRAG() {
   }
 
   return (
-    <main className="upload-container">
-      <div className="upload-header">
-        <h1 className="upload-title">Consulta Inteligente</h1>
-        <p className="upload-subtitle">Faça perguntas sobre os dados financeiros usando IA</p>
-      </div>
+    <main className="pagina">
+      <section className="cabecalho">
+        <h1>Consulta Inteligente</h1>
+        <p>Faça perguntas sobre os dados financeiros usando IA</p>
+      </section>
 
-      <div className="upload-card">
+      <section className="card">
         <div className="abas">
           <button
             className={modo === 'simples' ? 'aba ativo' : 'aba'}
@@ -86,26 +86,26 @@ export default function ConsultaRAG() {
         />
 
         <button
-          className="upload-button"
+          className="botao"
           onClick={consultar}
           disabled={carregando}
         >
           {carregando ? 'Consultando...' : 'Consultar'}
         </button>
-      </div>
+      </section>
 
       {erro && (
-        <div className="upload-card" style={{ borderLeft: '4px solid #ef4444' }}>
-          <p style={{ color: '#ef4444', margin: 0 }}>Erro: {erro}</p>
-        </div>
+        <section className="card card--erro">
+          <p>Erro: {erro}</p>
+        </section>
       )}
 
       {resposta && (
-        <div className="upload-card">
+        <section className="card">
           <h2 className="resultado-titulo">Resposta da IA</h2>
           <p className="modo-badge">Modo: {modo === 'simples' ? 'RAG Simples' : 'RAG Embeddings'}</p>
           <p className="consulta-resposta">{resposta}</p>
-        </div>
+        </section>
       )}
     </main>
   )

@@ -4,6 +4,9 @@ import os
 from werkzeug.utils import secure_filename
 from agents.nota_fiscal.consulta_dados import extrair_dados_nota_fiscal
 from agents.rag.consulta_rag import consultar_rag_simples, consultar_rag_embeddings
+import agents.rag.consulta_rag as _rag_module
+import agents.nota_fiscal.manipulacao_dados as _md_module
+import config
 import repository
 
 app = Flask(__name__)
@@ -112,6 +115,19 @@ def analisar():
         "parcela_id":   ultimo_id_parcela,
         "sucesso":     True,
     })
+
+
+@app.route("/configurar-chave", methods=["POST"])
+def configurar_chave():
+    body = request.get_json(force=True)
+    chave = body.get("gemini_key", "").strip()
+    if not chave:
+        return jsonify({"erro": "Chave não informada"}), 400
+    config.set_gemini_key(chave)
+    # Invalida clientes cacheados para forçar recriação com a nova chave
+    _rag_module.gemini_client = None
+    _md_module.gemini_client = None
+    return jsonify({"ok": True})
 
 
 @app.route("/consultar", methods=["POST"])

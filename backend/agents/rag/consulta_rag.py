@@ -3,6 +3,7 @@ import numpy as np
 from google import genai
 from dotenv import load_dotenv
 import database
+import config
 
 load_dotenv()
 
@@ -12,8 +13,9 @@ gemini_client = None
 
 def _get_gemini_client():
     global gemini_client
-    if gemini_client is None and GEMINI_API_KEY:
-        gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+    chave = config.get_gemini_key() or GEMINI_API_KEY
+    if gemini_client is None and chave:
+        gemini_client = genai.Client(api_key=chave)
     return gemini_client
 
 

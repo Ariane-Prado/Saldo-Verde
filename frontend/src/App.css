@@ -475,3 +475,68 @@ body {
   color: #6b7280;
   margin: 0 0 16px;
 }
+
+/* ============================================
+   Modal de configuração da chave API
+   ============================================ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-card h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #111827;
+}
+
+.modal-card > p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.modal-card a {
+  font-size: 13px;
+  color: #16a34a;
+  text-decoration: underline;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: #16a34a;
+}
+
+.modal-erro {
+  color: #ef4444;
+  font-size: 13px;
+  margin: 0;
+}
