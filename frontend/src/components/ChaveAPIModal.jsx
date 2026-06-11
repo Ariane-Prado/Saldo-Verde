@@ -7,7 +7,8 @@ export default function ChaveAPIModal({ onConfirmar }) {
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState(null)
 
-  async function confirmar() {
+  async function confirmar(e) {
+    if (e) e.preventDefault()
     if (!chave.trim()) {
       setErro('Informe a chave antes de continuar.')
       return
@@ -33,45 +34,43 @@ export default function ChaveAPIModal({ onConfirmar }) {
     }
   }
 
-  function handleKeyDown(e) {
-    if (e.key === 'Enter') confirmar()
-  }
-
   return (
     <div className="modal-overlay">
       <div className="modal-card">
         <h2>Bem-vindo ao Saldo Verde</h2>
         <p>Para usar o sistema, informe sua chave da API Google Gemini.</p>
 
-        <label className="label" style={{ marginBottom: 4 }}>Chave da API Gemini</label>
-        <input
-          className="modal-input"
-          type="password"
-          value={chave}
-          onChange={e => setChave(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="AIzaSy..."
-          autoFocus
-        />
+        <form onSubmit={confirmar} style={{ display: 'contents' }}>
+          <label className="label" style={{ marginBottom: 4 }}>Chave da API Gemini</label>
+          <input
+            className="modal-input"
+            type="password"
+            value={chave}
+            onChange={e => setChave(e.target.value)}
+            placeholder="AIzaSy..."
+            autoFocus
+            autoComplete="current-password"
+          />
 
-        <a
-          href="https://aistudio.google.com/apikey"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Não tem uma chave? Obtenha gratuitamente aqui.
-        </a>
+          <a
+            href="https://aistudio.google.com/apikey"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Não tem uma chave? Obtenha gratuitamente aqui.
+          </a>
 
-        {erro && <p className="modal-erro">{erro}</p>}
+          {erro && <p className="modal-erro">{erro}</p>}
 
-        <button
-          className="botao"
-          onClick={confirmar}
-          disabled={carregando}
-          style={{ marginTop: 4 }}
-        >
-          {carregando ? 'Configurando...' : 'Entrar'}
-        </button>
+          <button
+            type="submit"
+            className="botao"
+            disabled={carregando}
+            style={{ marginTop: 4 }}
+          >
+            {carregando ? 'Configurando...' : 'Entrar'}
+          </button>
+        </form>
       </div>
     </div>
   )

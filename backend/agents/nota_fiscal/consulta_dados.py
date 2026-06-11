@@ -1,3 +1,4 @@
+import config
 from agents.nota_fiscal.manipulacao_dados import (
     GEMINI_API_KEY,
     ANTHROPIC_API_KEY,
@@ -8,7 +9,10 @@ from agents.nota_fiscal.manipulacao_dados import (
 )
 
 def extrair_dados_nota_fiscal(caminho_arquivo):
-    if GEMINI_API_KEY:
+    # Usa chave em memória (informada pelo usuário) ou a do .env como fallback
+    gemini_disponivel = config.get_gemini_key() or GEMINI_API_KEY
+
+    if gemini_disponivel:
         try:
             return extrair_com_gemini(caminho_arquivo)
         except Exception as e:
