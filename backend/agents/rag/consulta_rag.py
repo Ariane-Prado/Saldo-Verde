@@ -1,5 +1,8 @@
 import os
+import re
+import math
 import numpy as np
+from collections import Counter
 from google import genai
 from dotenv import load_dotenv
 import database
@@ -10,6 +13,7 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 gemini_client = None
+gemini_embed_client = None
 
 def _get_gemini_client():
     global gemini_client
@@ -19,10 +23,11 @@ def _get_gemini_client():
     return gemini_client
 
 
-def _buscar_registros():
+def _buscar_registros(limit=20):
     conn = database.get_connection()
     cur = conn.cursor()
-    cur.execute("""
+    limite_sql = f"LIMIT {limit}" if limit else ""
+    cur.execute(f"""
         SELECT
             m.id,
             m.tipo,
@@ -41,7 +46,7 @@ def _buscar_registros():
         LEFT JOIN PARCELACONTAS p  ON p.id_movimento = m.id
         WHERE m.ativo = TRUE
         ORDER BY m.data_emissao DESC
-        LIMIT 20
+        {limite_sql}
     """)
     colunas = [desc[0] for desc in cur.description]
     registros = [dict(zip(colunas, linha)) for linha in cur.fetchall()]
@@ -80,6 +85,24 @@ def _chamar_llm(contexto, pergunta):
     return response.text
 
 
+# ── RAG Embeddings: vetorização TF local (bag-of-words + cosine similarity) ──
+
+def _tokenizar(texto):
+    return re.findall(r'\w+', texto.lower())
+
+def _tf_vetor(texto):
+    return Counter(_tokenizar(texto))
+
+def _cosine_similarity_tf(v1, v2):
+    comum = set(v1.keys()) & set(v2.keys())
+    numerador = sum(v1[w] * v2[w] for w in comum)
+    norma1 = math.sqrt(sum(c ** 2 for c in v1.values()))
+    norma2 = math.sqrt(sum(c ** 2 for c in v2.values()))
+    if not norma1 or not norma2:
+        return 0.0
+    return numerador / (norma1 * norma2)
+
+
 def consultar_rag_simples(pergunta):
     registros = _buscar_registros()
     if not registros:
@@ -89,36 +112,17 @@ def consultar_rag_simples(pergunta):
 
 
 def consultar_rag_embeddings(pergunta, top_k=5):
-    registros = _buscar_registros()
+    registros = _buscar_registros(limit=None)
     if not registros:
         return "Nenhum registro encontrado no banco de dados."
 
-    client = _get_gemini_client()
     textos = [_formatar_linha(r) for r in registros]
 
-    # Gera embeddings dos registros (1 chamada batch)
-    resp_docs = client.models.embed_content(
-        model="text-embedding-004",
-        contents=textos
-    )
-    vetores_docs = [e.values for e in resp_docs.embeddings]
+    # Vetoriza cada registro e a pergunta (TF bag-of-words)
+    vetor_pergunta = _tf_vetor(pergunta)
+    scores = [_cosine_similarity_tf(vetor_pergunta, _tf_vetor(t)) for t in textos]
 
-    # Gera embedding da pergunta
-    resp_query = client.models.embed_content(
-        model="text-embedding-004",
-        contents=[pergunta]
-    )
-    vetor_pergunta = resp_query.embeddings[0].values
-
-    # Calcula cosine similarity
-    vp = np.array(vetor_pergunta)
-    scores = []
-    for vd in vetores_docs:
-        vd_arr = np.array(vd)
-        score = float(np.dot(vp, vd_arr) / (np.linalg.norm(vp) * np.linalg.norm(vd_arr)))
-        scores.append(score)
-
-    # Pega os top_k índices mais relevantes
+    # Seleciona os top_k registros mais similares à pergunta
     top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
     contexto = "\n".join(textos[i] for i in top_indices)
 

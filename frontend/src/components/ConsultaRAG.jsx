@@ -57,13 +57,13 @@ export default function ConsultaRAG() {
         <div className="abas">
           <button
             className={modo === 'simples' ? 'aba ativo' : 'aba'}
-            onClick={() => setModo('simples')}
+            onClick={() => { setModo('simples'); setResposta(null); setErro(null) }}
           >
             RAG Simples
           </button>
           <button
             className={modo === 'embeddings' ? 'aba ativo' : 'aba'}
-            onClick={() => setModo('embeddings')}
+            onClick={() => { setModo('embeddings'); setResposta(null); setErro(null) }}
           >
             RAG Embeddings
           </button>
@@ -71,8 +71,8 @@ export default function ConsultaRAG() {
 
         <p className="observacao">
           {modo === 'simples'
-            ? 'Envia todos os registros do banco como contexto para a IA responder.'
-            : 'Busca os registros mais relevantes por similaridade semântica antes de responder.'}
+            ? 'Envia os 20 registros mais recentes como contexto para a IA responder.'
+            : 'Varre todos os registros e seleciona os 5 mais relevantes para a pergunta antes de responder.'}
         </p>
 
         <label className="label">Sua pergunta</label>
