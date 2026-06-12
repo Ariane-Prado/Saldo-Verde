@@ -113,15 +113,14 @@ def _extrair_entidades(pergunta: str) -> Entidades:
         if m:
             ent.documento = m.group()
 
-    # Nome de entidade após gatilho relacional
+    # Nome de entidade após gatilho relacional específico (sem "de"/"do" que são genéricos demais)
     m = re.search(
-        r'(?:fornecedor|faturado|empresa|para|do|de)\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s]{3,40}?)(?:\s*\(|,|\.|$)',
+        r'(?:fornecedor|faturado|empresa|para)\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s]{3,40}?)(?:\s*\(|,|\.|$)',
         pergunta,
         re.IGNORECASE,
     )
     if m:
         candidato = m.group(1).strip()
-        # Filtra falsos positivos curtos ou só números
         if len(candidato) >= 4 and not candidato.isdigit():
             ent.nome_entidade = candidato
 
