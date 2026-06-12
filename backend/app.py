@@ -3,7 +3,7 @@ from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
 from agents.nota_fiscal.consulta_dados import extrair_dados_nota_fiscal
-from agents.rag.consulta_rag import consultar_rag_simples, consultar_rag_embeddings
+from agents.rag.consulta_rag import consultar_rag_simples, consultar_rag_embeddings, reset_vector_store
 import agents.rag.consulta_rag as _rag_module
 import agents.nota_fiscal.manipulacao_dados as _md_module
 import config
@@ -106,6 +106,9 @@ def analisar():
             "data_vencimento": data_emissao,
             "valor":           valor_total,
         })
+
+    # Invalida o índice vetorial para que o novo movimento seja indexado na próxima consulta
+    reset_vector_store()
 
     return jsonify({
         "fornecedor":  forn_resp,
