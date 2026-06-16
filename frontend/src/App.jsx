@@ -12,11 +12,11 @@ import ManterContas from './components/crud/ManterContas'
 const PAGINAS_IA = ['upload', 'consulta']
 
 const ITENS_NAV = [
-  { id: 'upload',        rotulo: 'Nota Fiscal',         secao: 'IA' },
-  { id: 'consulta',      rotulo: 'Consulta IA',          secao: 'IA' },
-  { id: 'pessoas',       rotulo: 'Manter Pessoas',       secao: 'Cadastros' },
-  { id: 'classificacao', rotulo: 'Manter Classificação', secao: 'Cadastros' },
-  { id: 'contas',        rotulo: 'Manter Contas',        secao: 'Cadastros' },
+  { id: 'upload',        rotulo: 'Nota Fiscal',   secao: 'IA' },
+  { id: 'consulta',      rotulo: 'Consulta IA',   secao: 'IA' },
+  { id: 'pessoas',       rotulo: 'Pessoas',        secao: 'Cadastros' },
+  { id: 'classificacao', rotulo: 'Classificação',  secao: 'Cadastros' },
+  { id: 'contas',        rotulo: 'Contas',         secao: 'Cadastros' },
 ]
 
 function IconeChave({ ativo }) {
@@ -32,7 +32,7 @@ function IconeChave({ ativo }) {
 }
 
 function App() {
-  const [usuarioLogado, setUsuarioLogado]   = useState(null)
+  const [usuarioLogado, setUsuarioLogado]   = useState(() => localStorage.getItem('sv_usuario'))
   const [chaveOk, setChaveOk]               = useState(false)
   const [pagina, setPagina]                 = useState('pessoas')
   const [modalChave, setModalChave]         = useState(false)
@@ -40,6 +40,7 @@ function App() {
   const [tutorialAberto, setTutorialAberto] = useState(false)
 
   function handleLogin(nome) {
+    localStorage.setItem('sv_usuario', nome)
     setUsuarioLogado(nome)
     setTutorialAberto(true)
   }
@@ -72,6 +73,7 @@ function App() {
   }
 
   function sair() {
+    localStorage.removeItem('sv_usuario')
     setUsuarioLogado(null)
     setChaveOk(false)
     setPagina('pessoas')
@@ -107,10 +109,6 @@ function App() {
             </div>
           ))}
 
-          <span className="sidebar-secao">Ajuda</span>
-          <button onClick={() => setTutorialAberto(true)} data-tutorial="nav-tutorial">
-            📖 Tutorial
-          </button>
         </nav>
 
         <button

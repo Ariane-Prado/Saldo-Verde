@@ -9,7 +9,7 @@ const PASSOS = [
   },
   {
     titulo: 'Menu de Navegação',
-    descricao: 'A sidebar à esquerda contém todos os acessos do sistema, divididos em seções.',
+    descricao: 'A sidebar à esquerda contém todos os acessos do sistema, divididos em duas seções.',
     lista: [
       'IA — Nota Fiscal e Consulta IA (requer chave Gemini)',
       'Cadastros — Pessoas, Classificação e Contas',
@@ -18,7 +18,7 @@ const PASSOS = [
     alvo: '[data-tutorial="sidebar"]',
   },
   {
-    titulo: 'Manter Pessoas',
+    titulo: 'Pessoas',
     descricao: 'Cadastre todos os envolvidos nas movimentações financeiras. Existem três tipos de pessoa:',
     lista: [
       'Fornecedor — Empresa ou pessoa que fornece produtos ou serviços',
@@ -29,7 +29,7 @@ const PASSOS = [
     alvo: '[data-tutorial="nav-pessoas"]',
   },
   {
-    titulo: 'Manter Classificação',
+    titulo: 'Classificação',
     descricao: 'Classifique suas movimentações financeiras em categorias para melhor controle:',
     lista: [
       'Despesa — Gastos da empresa (ex: Insumos Agrícolas, Combustível)',
@@ -39,7 +39,7 @@ const PASSOS = [
     alvo: '[data-tutorial="nav-classificacao"]',
   },
   {
-    titulo: 'Manter Contas',
+    titulo: 'Contas',
     descricao: 'Registre todas as movimentações financeiras da empresa:',
     lista: [
       'A Pagar — Despesas e pagamentos a fornecedores',
@@ -83,9 +83,9 @@ const PASSOS = [
   },
   {
     titulo: 'Tudo pronto!',
-    descricao: 'Você já sabe o suficiente para usar o Saldo Verde. Sempre que precisar rever este tutorial, clique em Tutorial no menu lateral.',
+    descricao: 'Você já sabe o suficiente para usar o Saldo Verde. Bom trabalho!',
     dica: null,
-    alvo: '[data-tutorial="nav-tutorial"]',
+    alvo: null,
   },
 ]
 
