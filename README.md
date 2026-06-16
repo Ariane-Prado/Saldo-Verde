@@ -44,8 +44,7 @@ Na tela de login, clique em um dos acessos disponíveis para preencher automatic
 
 | Usuário | Senha |
 |---|---|
-| `admin` | `admin123` |
-| `ariane` | `verde2025` |
+
 
 Após o login, um tutorial interativo abre automaticamente mostrando todas as funcionalidades. Você pode pulá-lo e reabrir a qualquer momento pelo menu lateral.
 
