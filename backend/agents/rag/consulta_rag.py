@@ -515,7 +515,13 @@ def _get_vector_store() -> dict | None:
                 if total_db != len(store.get("mov_ids", [])):
                     logger.info("[FAISS] Índice em disco desatualizado — reconstruindo.")
                     store = None
-            _vector_store = store if store is not None else _build_vector_store_interno()
+            if store is None:
+                try:
+                    store = _build_vector_store_interno()
+                except Exception as e:
+                    logger.warning(f"[FAISS] Falha ao construir índice (chave ausente?): {e}")
+                    store = None
+            _vector_store = store
     return _vector_store
 
 
