@@ -35,6 +35,9 @@ _KEYWORDS_AGREGACAO = [
     "total", "soma", "quanto", "maior", "menor", "média", "quantos",
     "qual o valor", "qual foi", "qual é a despesa", "vencerão", "vencimento",
     "ranking", "segundo maior", "top",
+    "mais alto", "mais baixo", "mais caro", "mais barato",
+    "maior valor", "menor valor", "valor mais", "nota mais",
+    "mais alta", "mais cara",
 ]
 
 _KEYWORDS_SEMANTICO = [
@@ -574,11 +577,9 @@ def _chamar_llm(contexto: str, pergunta: str, modo: str = "agregacao") -> str:
 
     if modo == "semantico":
         instrucao = (
-            "Os dados abaixo são os registros financeiros mais relevantes semanticamente para a pergunta. "
-            "Interprete termos diferentes como equivalentes quando fizer sentido agrícola: "
-            "'MANUTENÇÃO E OPERAÇÃO' pode corresponder a 'MANUTENÇÃO DE MÁQUINAS'; "
-            "'melhorar o solo', 'corretivos' e 'neutralizadores' correspondem a 'INSUMOS AGRÍCOLAS'. "
-            "Identifique e descreva os registros que se enquadram na pergunta. "
+            "Os dados abaixo são registros financeiros. "
+            "Analise todos os campos: nome do fornecedor, faturado, classificação, valor e datas. "
+            "Identifique e descreva os registros que se enquadram na pergunta, considerando sinônimos e termos relacionados. "
             "Não calcule totais nem faça rankings a menos que a pergunta peça explicitamente. "
             "Se não houver registros relevantes, diga isso claramente."
         )
@@ -620,8 +621,8 @@ def consultar_rag_simples(pergunta: str) -> str:
             return "Nenhum registro encontrado no banco de dados."
         return _chamar_llm(contexto, pergunta, modo="agregacao")
 
-    # Fallback: registros mais recentes sem embedding
-    registros = _buscar_registros(limit=20)
+    # Fallback: todos os registros sem embedding
+    registros = _buscar_registros(limit=None)
     if not registros:
         return "Nenhum registro encontrado no banco de dados."
 
