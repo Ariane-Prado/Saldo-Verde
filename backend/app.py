@@ -125,6 +125,12 @@ def analisar():
     })
 
 
+@app.route("/status-chave", methods=["GET"])
+def status_chave():
+    chave = config.get_gemini_key() or os.getenv("GEMINI_API_KEY", "")
+    return jsonify({"configurada": bool(chave)})
+
+
 @app.route("/configurar-chave", methods=["POST"])
 def configurar_chave():
     body = request.get_json(force=True)
