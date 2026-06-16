@@ -690,30 +690,34 @@ def consultar_rag_embeddings(pergunta: str, top_k: int = 30) -> str:
     subset_ids: set[int] = set()
     contexto_sql_extra = ""
 
+    contexto_faiss = ""
+
     if tem_filtros_objetivos:
         logger.info("[RAG-SEM] Modo híbrido interno — pré-filtro SQL + FAISS")
         subset_ids = _buscar_ids_filtrados(entidades)
-
-        # Se há sinal de agregação junto com semântico, inclui dados SQL como contexto adicional
         if entidades.eh_agregacao:
             contexto_sql_extra = _buscar_contexto_agregado(pergunta, entidades)
+        contexto_faiss = _recuperar_contexto_faiss(pergunta, top_k=top_k, subset_ids=subset_ids or None) or ""
     else:
-        logger.info("[RAG-SEM] Modo semântico puro — FAISS global")
-
-    contexto_faiss = _recuperar_contexto_faiss(pergunta, top_k=top_k, subset_ids=subset_ids or None)
+        total_db = _contar_movimentos()
+        if total_db <= 200:
+            logger.info(f"[RAG-SEM] Banco pequeno ({total_db} registros) — enviando todos ao LLM")
+            registros = _buscar_registros(limit=None)
+            if not registros:
+                return "Nenhum registro encontrado no banco de dados."
+            vistos: set[int] = set()
+            linhas: list[str] = []
+            for r in registros:
+                if r["id"] not in vistos:
+                    vistos.add(r["id"])
+                    linhas.append(_formatar_linha(r))
+            contexto_faiss = _truncar_contexto("\n".join(linhas))
+        else:
+            logger.info(f"[RAG-SEM] Banco grande ({total_db} registros) — FAISS global")
+            contexto_faiss = _recuperar_contexto_faiss(pergunta, top_k=top_k, subset_ids=None) or ""
 
     if not contexto_faiss and not contexto_sql_extra:
-        # Fallback: FAISS não encontrou nada — busca todos os registros do banco
-        registros = _buscar_registros(limit=None)
-        if not registros:
-            return "Nenhum registro encontrado no banco de dados."
-        vistos: set[int] = set()
-        linhas: list[str] = []
-        for r in registros:
-            if r["id"] not in vistos:
-                vistos.add(r["id"])
-                linhas.append(_formatar_linha(r))
-        contexto_faiss = _truncar_contexto("\n".join(linhas))
+        return "Nenhum registro encontrado no banco de dados."
 
     partes: list[str] = []
     if contexto_sql_extra:
