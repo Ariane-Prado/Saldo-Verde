@@ -152,5 +152,171 @@ def consultar():
         return jsonify({"erro": str(e)}), 500
 
 
+# ─────────────────────────────────────────────────────────────
+# CRUD — Pessoas
+# ─────────────────────────────────────────────────────────────
+
+@app.route("/pessoas", methods=["GET"])
+def rota_listar_pessoas():
+    q    = request.args.get("q", "").strip() or None
+    tipo = request.args.get("tipo", "").strip() or None
+    return jsonify({"registros": repository.listar_pessoas(q=q, tipo=tipo)})
+
+
+@app.route("/pessoas/<int:id>", methods=["GET"])
+def rota_obter_pessoa(id):
+    pessoa = repository.obter_pessoa(id)
+    if pessoa is None:
+        return jsonify({"erro": "Pessoa não encontrada"}), 404
+    return jsonify(pessoa)
+
+
+@app.route("/pessoas", methods=["POST"])
+def rota_criar_pessoa():
+    dados = request.get_json(force=True)
+    if not dados.get("razao_social"):
+        return jsonify({"erro": "razao_social é obrigatório"}), 400
+    if dados.get("tipo") not in ("FORNECEDOR", "CLIENTE", "FATURADO"):
+        return jsonify({"erro": "tipo deve ser FORNECEDOR, CLIENTE ou FATURADO"}), 400
+    try:
+        novo_id = repository.inserir_pessoa(dados)
+        return jsonify({"id": novo_id}), 201
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+
+@app.route("/pessoas/<int:id>", methods=["PUT"])
+def rota_atualizar_pessoa(id):
+    dados = request.get_json(force=True)
+    if not dados.get("razao_social"):
+        return jsonify({"erro": "razao_social é obrigatório"}), 400
+    try:
+        ok = repository.atualizar_pessoa(id, dados)
+        if not ok:
+            return jsonify({"erro": "Pessoa não encontrada"}), 404
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+
+@app.route("/pessoas/<int:id>", methods=["DELETE"])
+def rota_excluir_pessoa(id):
+    ok = repository.desativar_pessoa(id)
+    if not ok:
+        return jsonify({"erro": "Pessoa não encontrada"}), 404
+    return jsonify({"ok": True})
+
+
+# ─────────────────────────────────────────────────────────────
+# CRUD — Classificação
+# ─────────────────────────────────────────────────────────────
+
+@app.route("/classificacoes", methods=["GET"])
+def rota_listar_classificacoes():
+    q    = request.args.get("q", "").strip() or None
+    tipo = request.args.get("tipo", "").strip() or None
+    return jsonify({"registros": repository.listar_classificacoes(q=q, tipo=tipo)})
+
+
+@app.route("/classificacoes/<int:id>", methods=["GET"])
+def rota_obter_classificacao(id):
+    cls = repository.obter_classificacao(id)
+    if cls is None:
+        return jsonify({"erro": "Classificação não encontrada"}), 404
+    return jsonify(cls)
+
+
+@app.route("/classificacoes", methods=["POST"])
+def rota_criar_classificacao():
+    dados = request.get_json(force=True)
+    if not dados.get("descricao"):
+        return jsonify({"erro": "descricao é obrigatória"}), 400
+    if dados.get("tipo") not in ("DESPESA", "RECEITA"):
+        return jsonify({"erro": "tipo deve ser DESPESA ou RECEITA"}), 400
+    try:
+        novo_id = repository.inserir_classificacao(dados)
+        return jsonify({"id": novo_id}), 201
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+
+@app.route("/classificacoes/<int:id>", methods=["PUT"])
+def rota_atualizar_classificacao(id):
+    dados = request.get_json(force=True)
+    if not dados.get("descricao"):
+        return jsonify({"erro": "descricao é obrigatória"}), 400
+    try:
+        ok = repository.atualizar_classificacao(id, dados)
+        if not ok:
+            return jsonify({"erro": "Classificação não encontrada"}), 404
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+
+@app.route("/classificacoes/<int:id>", methods=["DELETE"])
+def rota_excluir_classificacao(id):
+    ok = repository.desativar_classificacao(id)
+    if not ok:
+        return jsonify({"erro": "Classificação não encontrada"}), 404
+    return jsonify({"ok": True})
+
+
+# ─────────────────────────────────────────────────────────────
+# CRUD — MovimentoContas
+# ─────────────────────────────────────────────────────────────
+
+@app.route("/movimentos", methods=["GET"])
+def rota_listar_movimentos():
+    q    = request.args.get("q", "").strip() or None
+    tipo = request.args.get("tipo", "").strip() or None
+    return jsonify({"registros": repository.listar_movimentos(q=q, tipo=tipo)})
+
+
+@app.route("/movimentos/<int:id>", methods=["GET"])
+def rota_obter_movimento(id):
+    mov = repository.obter_movimento_completo(id)
+    if mov is None:
+        return jsonify({"erro": "Movimento não encontrado"}), 404
+    return jsonify(mov)
+
+
+@app.route("/movimentos", methods=["POST"])
+def rota_criar_movimento():
+    dados = request.get_json(force=True)
+    if dados.get("tipo") not in ("APAGAR", "ARECEBER"):
+        return jsonify({"erro": "tipo deve ser APAGAR ou ARECEBER"}), 400
+    if not dados.get("valor_total"):
+        return jsonify({"erro": "valor_total é obrigatório"}), 400
+    try:
+        novo_id = repository.inserir_movimento_crud(dados)
+        reset_vector_store()
+        return jsonify({"id": novo_id}), 201
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+
+@app.route("/movimentos/<int:id>", methods=["PUT"])
+def rota_atualizar_movimento(id):
+    dados = request.get_json(force=True)
+    try:
+        ok = repository.atualizar_movimento_crud(id, dados)
+        if not ok:
+            return jsonify({"erro": "Movimento não encontrado"}), 404
+        reset_vector_store()
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+
+@app.route("/movimentos/<int:id>", methods=["DELETE"])
+def rota_excluir_movimento(id):
+    ok = repository.desativar_movimento(id)
+    if not ok:
+        return jsonify({"erro": "Movimento não encontrado"}), 404
+    reset_vector_store()
+    return jsonify({"ok": True})
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8000)
