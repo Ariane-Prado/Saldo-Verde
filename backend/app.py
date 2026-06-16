@@ -49,12 +49,13 @@ def extrair():
 def analisar():
     body = request.get_json(force=True)
 
-    fornecedor_input = body.get("fornecedor", {})
-    faturado_input   = body.get("faturado", {})
-    despesa_input    = body.get("despesa", {})
-    valor_total      = body.get("valor_total", 0)
-    data_emissao     = body.get("data_emissao")
-    parcelas         = body.get("parcelas", [])
+    fornecedor_input  = body.get("fornecedor", {})
+    faturado_input    = body.get("faturado", {})
+    despesa_input     = body.get("despesa", {})
+    valor_total       = body.get("valor_total", 0)
+    data_emissao      = body.get("data_emissao")
+    parcelas          = body.get("parcelas", [])
+    descricao_itens   = body.get("descricao_itens", "")
 
     # --- FORNECEDOR ---
     res_forn = repository.buscar_fornecedor(fornecedor_input.get("cnpj"))
@@ -91,6 +92,7 @@ def analisar():
         "id_classificacao": id_classificacao,
         "valor_total":     valor_total,
         "data_emissao":    data_emissao,
+        "descricao_itens": descricao_itens,
     })
 
     # --- PARCELAS ---

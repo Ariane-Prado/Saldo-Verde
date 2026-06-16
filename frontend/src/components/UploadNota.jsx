@@ -219,6 +219,7 @@ export default function UploadNota() {
         },
         valor_total: Number(dados.valor_total) || 0,
         data_emissao: dados.data_emissao ?? null,
+        descricao_itens: dados.descricao_produtos ?? "",
         parcelas: parcelas.map((p) => ({
           numero: p.numero ?? 1,
           data_vencimento: p.data_vencimento ?? null,

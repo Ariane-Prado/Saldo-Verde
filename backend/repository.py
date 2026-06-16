@@ -105,8 +105,8 @@ def criar_movimento(dados):
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO MOVIMENTOCONTAS (tipo, id_fornecedor, id_faturado, id_classificacao, valor_total, data_emissao)
-                VALUES ('APAGAR', %s, %s, %s, %s, %s)
+                INSERT INTO MOVIMENTOCONTAS (tipo, id_fornecedor, id_faturado, id_classificacao, valor_total, data_emissao, descricao_itens)
+                VALUES ('APAGAR', %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
@@ -115,6 +115,7 @@ def criar_movimento(dados):
                     dados.get("id_classificacao"),
                     dados.get("valor_total"),
                     _normalizar_data(dados.get("data_emissao")),
+                    dados.get("descricao_itens"),
                 )
             )
             novo_id = _fetch_id(cur, "MOVIMENTOCONTAS")
@@ -296,7 +297,8 @@ def listar_movimentos(q=None, tipo=None):
                pf.razao_social AS fornecedor_nome,
                pt.razao_social AS faturado_nome,
                c.descricao     AS classificacao_descricao,
-               m.id_fornecedor, m.id_faturado, m.id_classificacao
+               m.id_fornecedor, m.id_faturado, m.id_classificacao,
+               m.descricao_itens
         FROM MOVIMENTOCONTAS m
         LEFT JOIN PESSOAS pf ON m.id_fornecedor = pf.id
         LEFT JOIN PESSOAS pt ON m.id_faturado   = pt.id
@@ -325,7 +327,8 @@ def obter_movimento_completo(id):
                        pf.razao_social AS fornecedor_nome,
                        pt.razao_social AS faturado_nome,
                        c.descricao     AS classificacao_descricao,
-                       m.id_fornecedor, m.id_faturado, m.id_classificacao
+                       m.id_fornecedor, m.id_faturado, m.id_classificacao,
+                       m.descricao_itens
                 FROM MOVIMENTOCONTAS m
                 LEFT JOIN PESSOAS pf ON m.id_fornecedor = pf.id
                 LEFT JOIN PESSOAS pt ON m.id_faturado   = pt.id
@@ -363,8 +366,8 @@ def inserir_movimento_crud(dados):
             cur.execute(
                 """
                 INSERT INTO MOVIMENTOCONTAS
-                    (tipo, id_fornecedor, id_faturado, id_classificacao, valor_total, data_emissao)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                    (tipo, id_fornecedor, id_faturado, id_classificacao, valor_total, data_emissao, descricao_itens)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
@@ -374,6 +377,7 @@ def inserir_movimento_crud(dados):
                     dados.get("id_classificacao"),
                     dados.get("valor_total"),
                     _normalizar_data(dados.get("data_emissao")),
+                    dados.get("descricao_itens"),
                 )
             )
             id_mov = _fetch_id(cur, "MOVIMENTOCONTAS")

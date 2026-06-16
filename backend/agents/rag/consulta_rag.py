@@ -144,6 +144,16 @@ def _extrair_entidades(pergunta: str) -> Entidades:
 
 # ── Banco de dados ─────────────────────────────────────────────────────────────
 
+def _contar_movimentos() -> int:
+    conn = database.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM MOVIMENTOCONTAS WHERE ativo = TRUE")
+            return cur.fetchone()[0]
+    finally:
+        conn.close()
+
+
 def _buscar_registros(limit: int | None = 20) -> list[dict]:
     conn = database.get_connection()
     try:
@@ -155,6 +165,7 @@ def _buscar_registros(limit: int | None = 20) -> list[dict]:
                     forn.razao_social AS fornecedor,
                     fat.razao_social  AS faturado,
                     cl.descricao      AS classificacao,
+                    m.descricao_itens,
                     p.identificacao,
                     p.data_vencimento,
                     p.valor           AS valor_parcela
@@ -224,6 +235,7 @@ def _formatar_linha(r: dict) -> str:
         f"Fornecedor: {r.get('fornecedor') or '-'} | "
         f"Faturado: {r.get('faturado') or '-'} | "
         f"Classificação: {r.get('classificacao') or '-'} | "
+        f"Itens: {r.get('descricao_itens') or '-'} | "
         f"Total: {total} | "
         f"Emissão: {r.get('data_emissao') or '-'} | "
         f"Parcela: {r.get('identificacao') or '-'} | "
@@ -239,6 +251,7 @@ def _formatar_para_embedding(r: dict) -> str:
         f"Fornecedor: {r.get('fornecedor') or 'desconhecido'}. "
         f"Faturado para: {r.get('faturado') or 'desconhecido'}. "
         f"Classificação: {r.get('classificacao') or 'sem classificação'}. "
+        f"Itens/produtos: {r.get('descricao_itens') or 'não informado'}. "
         f"Valor total: R$ {r.get('valor_total') or '0'}. "
         f"Emitida em {r.get('data_emissao') or 'data desconhecida'}. "
         f"Parcela {r.get('identificacao') or '-'} "
@@ -488,10 +501,20 @@ def _build_vector_store_interno() -> dict | None:
 def _get_vector_store() -> dict | None:
     global _vector_store
     if _vector_store is not None:
-        return _vector_store
+        total_db = _contar_movimentos()
+        if total_db != len(_vector_store.get("mov_ids", [])):
+            logger.info(f"[FAISS] Índice desatualizado ({len(_vector_store.get('mov_ids', []))} vs {total_db} no banco) — reconstruindo.")
+            _vector_store = None
+        else:
+            return _vector_store
     with _build_lock:
         if _vector_store is None:
             store = _carregar_indice()
+            if store is not None:
+                total_db = _contar_movimentos()
+                if total_db != len(store.get("mov_ids", [])):
+                    logger.info("[FAISS] Índice em disco desatualizado — reconstruindo.")
+                    store = None
             _vector_store = store if store is not None else _build_vector_store_interno()
     return _vector_store
 

@@ -43,6 +43,7 @@ def init_db():
                     data_emissao      DATE,
                     ativo             BOOLEAN NOT NULL DEFAULT TRUE
                 );
+                ALTER TABLE MOVIMENTOCONTAS ADD COLUMN IF NOT EXISTS descricao_itens TEXT;
 
                 CREATE TABLE IF NOT EXISTS PARCELACONTAS (
                     id               SERIAL PRIMARY KEY,
