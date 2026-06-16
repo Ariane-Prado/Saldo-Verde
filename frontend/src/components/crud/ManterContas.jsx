@@ -9,31 +9,41 @@ function fmtValor(v) {
   return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
+function fmtData(v) {
+  if (!v) return '—'
+  const [ano, mes, dia] = String(v).split('-')
+  return `${dia}/${mes}/${ano}`
+}
+
+const LABEL_TIPO = { APAGAR: 'A Pagar', ARECEBER: 'A Receber' }
+
 const COLUNAS = [
   { chave: 'id',                      rotulo: 'ID',            ordenavel: true },
   { chave: 'tipo',                     rotulo: 'Tipo',          ordenavel: true,
-    render: (v) => <span className={`badge badge--${v?.toLowerCase()}`}>{v}</span> },
+    render: (v) => <span className={`badge badge--${v?.toLowerCase()}`}>{LABEL_TIPO[v] ?? v}</span> },
   { chave: 'fornecedor_nome',          rotulo: 'Fornecedor',    ordenavel: true },
   { chave: 'faturado_nome',            rotulo: 'Faturado',      ordenavel: true },
   { chave: 'classificacao_descricao',  rotulo: 'Classificação', ordenavel: true },
   { chave: 'valor_total',              rotulo: 'Valor Total',   ordenavel: true, render: fmtValor },
-  { chave: 'data_emissao',             rotulo: 'Data Emissão',  ordenavel: true },
+  { chave: 'data_emissao',             rotulo: 'Data Emissão',  ordenavel: true, render: fmtData },
 ]
 
 export default function ManterContas() {
-  const [registros, setRegistros]     = useState([])
-  const [pessoas, setPessoas]         = useState([])
-  const [classifs, setClassifs]       = useState([])
-  const [carregando, setCarregando]   = useState(false)
-  const [salvando, setSalvando]       = useState(false)
-  const [erro, setErro]               = useState(null)
-  const [erroModal, setErroModal]     = useState(null)
-  const [modalAberto, setModalAberto] = useState(false)
-  const [editando, setEditando]       = useState(null)
-  const [ordenacao, setOrdenacao]     = useState({ campo: null, direcao: 'asc' })
-  const [busca, setBusca]             = useState('')
-  const [filtrTipo, setFiltrTipo]     = useState('')
-  const [parcelas, setParcelas]       = useState([{ identificacao: '', data_vencimento: '', valor: '' }])
+  const [registros, setRegistros]         = useState([])
+  const [pessoas, setPessoas]             = useState([])
+  const [classifs, setClassifs]           = useState([])
+  const [carregando, setCarregando]       = useState(false)
+  const [salvando, setSalvando]           = useState(false)
+  const [erro, setErro]                   = useState(null)
+  const [erroModal, setErroModal]         = useState(null)
+  const [modalAberto, setModalAberto]     = useState(false)
+  const [editando, setEditando]           = useState(null)
+  const [ordenacao, setOrdenacao]         = useState({ campo: null, direcao: 'asc' })
+  const [busca, setBusca]                 = useState('')
+  const [filtrTipo, setFiltrTipo]         = useState('')
+  const [parcelas, setParcelas]           = useState([{ identificacao: '', data_vencimento: '', valor: '' }])
+  const [detalheAberto, setDetalheAberto] = useState(false)
+  const [detalhando, setDetalhando]       = useState(null)
 
   useEffect(() => {
     fetch(`${API}/pessoas`).then(r => r.json()).then(j => setPessoas(j.registros ?? []))
@@ -66,6 +76,19 @@ export default function ManterContas() {
       return direcao === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va))
     }))
   }
+
+  async function abrirDetalhe(row) {
+    try {
+      const res  = await fetch(`${API}/movimentos/${row.id}`)
+      const json = await res.json()
+      setDetalhando(json)
+    } catch {
+      setDetalhando(row)
+    }
+    setDetalheAberto(true)
+  }
+
+  function fecharDetalhe() { setDetalheAberto(false); setDetalhando(null) }
 
   function abrirCriar() {
     setEditando(null)
@@ -106,13 +129,13 @@ export default function ManterContas() {
     setSalvando(true); setErroModal(null)
     const payload = {
       tipo:             dados.tipo,
-      id_fornecedor:    dados.id_fornecedor ? Number(dados.id_fornecedor) : null,
-      id_faturado:      dados.id_faturado   ? Number(dados.id_faturado)   : null,
+      id_fornecedor:    dados.id_fornecedor    ? Number(dados.id_fornecedor)    : null,
+      id_faturado:      dados.id_faturado      ? Number(dados.id_faturado)      : null,
       id_classificacao: dados.id_classificacao ? Number(dados.id_classificacao) : null,
       valor_total:      dados.valor_total ? Number(dados.valor_total) : null,
       data_emissao:     dados.data_emissao || null,
-      parcelas:         parcelas.filter(p => p.valor).map((p, i) => ({
-        identificacao:   p.identificacao || undefined,
+      parcelas:         parcelas.filter(p => p.valor).map(p => ({
+        identificacao:   p.identificacao   || undefined,
         data_vencimento: p.data_vencimento || undefined,
         valor:           Number(p.valor),
       })),
@@ -159,8 +182,8 @@ export default function ManterContas() {
         />
         <select className="crud-select" value={filtrTipo} onChange={e => setFiltrTipo(e.target.value)}>
           <option value="">Todos os tipos</option>
-          <option value="APAGAR">APAGAR</option>
-          <option value="ARECEBER">ARECEBER</option>
+          <option value="APAGAR">A Pagar</option>
+          <option value="ARECEBER">A Receber</option>
         </select>
         <button className="botao-buscar" onClick={() => carregar({ q: busca, tipo: filtrTipo })} disabled={carregando}>
           {carregando ? 'Buscando...' : 'Buscar'}
@@ -180,8 +203,84 @@ export default function ManterContas() {
         onExcluir={excluir}
         ordenacao={ordenacao}
         onOrdenar={ordenar}
+        onClicarLinha={abrirDetalhe}
       />
 
+      {/* Modal de detalhe da conta */}
+      {detalheAberto && detalhando && (
+        <div className="form-modal-overlay" onClick={fecharDetalhe}>
+          <div className="detalhe-card" onClick={e => e.stopPropagation()}>
+
+            <div className="detalhe-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <h2 className="detalhe-titulo">Conta #{detalhando.id}</h2>
+                <span className={`badge badge--${detalhando.tipo?.toLowerCase()}`}>
+                  {LABEL_TIPO[detalhando.tipo] ?? detalhando.tipo}
+                </span>
+              </div>
+              <button className="detalhe-fechar" onClick={fecharDetalhe}>✕</button>
+            </div>
+
+            <div className="detalhe-grid">
+              <div className="detalhe-item">
+                <span className="detalhe-label">Fornecedor</span>
+                <span className="detalhe-valor">{detalhando.fornecedor_nome ?? '—'}</span>
+              </div>
+              <div className="detalhe-item">
+                <span className="detalhe-label">Faturado</span>
+                <span className="detalhe-valor">{detalhando.faturado_nome ?? '—'}</span>
+              </div>
+              <div className="detalhe-item">
+                <span className="detalhe-label">Classificação</span>
+                <span className="detalhe-valor">{detalhando.classificacao_descricao ?? '—'}</span>
+              </div>
+              <div className="detalhe-item">
+                <span className="detalhe-label">Valor Total</span>
+                <span className="detalhe-valor detalhe-valor--destaque">{fmtValor(detalhando.valor_total)}</span>
+              </div>
+              <div className="detalhe-item">
+                <span className="detalhe-label">Data de Emissão</span>
+                <span className="detalhe-valor">{fmtData(detalhando.data_emissao)}</span>
+              </div>
+            </div>
+
+            {detalhando.parcelas?.length > 0 && (
+              <div className="detalhe-parcelas">
+                <p className="detalhe-secao-titulo">
+                  Parcelas <span className="detalhe-parcelas-count">{detalhando.parcelas.length}</span>
+                </p>
+                <table className="detalhe-tabela">
+                  <thead>
+                    <tr>
+                      <th>Identificação</th>
+                      <th>Vencimento</th>
+                      <th>Valor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detalhando.parcelas.map((p, i) => (
+                      <tr key={i}>
+                        <td>{p.identificacao || `Parcela ${i + 1}`}</td>
+                        <td>{fmtData(p.data_vencimento)}</td>
+                        <td>{fmtValor(p.valor)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div className="detalhe-rodape">
+              <button className="botao-editar" onClick={() => { fecharDetalhe(); abrirEditar(detalhando) }}>
+                Editar
+              </button>
+              <button className="botao-cancelar" onClick={fecharDetalhe}>Fechar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de criação / edição */}
       <FormModal
         titulo={editando ? `Editar Conta #${editando.id}` : 'Nova Conta'}
         aberto={modalAberto}
@@ -193,8 +292,8 @@ export default function ManterContas() {
         <div className="form-grupo">
           <label className="form-label">Tipo</label>
           <select name="tipo" className="form-select" defaultValue={editando?.tipo ?? 'APAGAR'} required>
-            <option value="APAGAR">APAGAR</option>
-            <option value="ARECEBER">ARECEBER</option>
+            <option value="APAGAR">A Pagar</option>
+            <option value="ARECEBER">A Receber</option>
           </select>
         </div>
 

@@ -1,4 +1,4 @@
-export default function TabelaCrud({ colunas, registros, onEditar, onExcluir, ordenacao, onOrdenar }) {
+export default function TabelaCrud({ colunas, registros, onEditar, onExcluir, ordenacao, onOrdenar, onClicarLinha }) {
   function seta(campo) {
     if (ordenacao.campo !== campo) return ' ↕'
     return ordenacao.direcao === 'asc' ? ' ↑' : ' ↓'
@@ -31,7 +31,11 @@ export default function TabelaCrud({ colunas, registros, onEditar, onExcluir, or
             </tr>
           ) : (
             registros.map((row, i) => (
-              <tr key={row.id ?? i}>
+              <tr
+                key={row.id ?? i}
+                onClick={onClicarLinha ? () => onClicarLinha(row) : undefined}
+                className={onClicarLinha ? 'linha-clicavel' : ''}
+              >
                 {colunas.map(col => (
                   <td key={col.chave}>
                     {col.render ? col.render(row[col.chave], row) : (row[col.chave] ?? '—')}
@@ -39,8 +43,14 @@ export default function TabelaCrud({ colunas, registros, onEditar, onExcluir, or
                 ))}
                 <td>
                   <div className="acoes-celula">
-                    <button className="botao-editar" onClick={() => onEditar(row)}>Editar</button>
-                    <button className="botao-excluir" onClick={() => onExcluir(row)}>Excluir</button>
+                    <button
+                      className="botao-editar"
+                      onClick={e => { e.stopPropagation(); onEditar(row) }}
+                    >Editar</button>
+                    <button
+                      className="botao-excluir"
+                      onClick={e => { e.stopPropagation(); onExcluir(row) }}
+                    >Excluir</button>
                   </div>
                 </td>
               </tr>
