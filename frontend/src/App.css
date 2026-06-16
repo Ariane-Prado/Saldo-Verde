@@ -1227,6 +1227,214 @@ body {
   color: #9ca3af;
 }
 
+/* ============================================
+   Tutorial
+   ============================================ */
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 24px;
+}
+
+.tutorial-card {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tutorial-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 12px;
+}
+
+.tutorial-contador {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #9ca3af;
+}
+
+.tutorial-pular {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #9ca3af;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tutorial-pular:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.tutorial-progresso-barra {
+  height: 4px;
+  background: #f3f4f6;
+  margin: 0 24px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.tutorial-progresso-fill {
+  height: 100%;
+  background: #16a34a;
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+.tutorial-corpo {
+  padding: 28px 32px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 280px;
+}
+
+.tutorial-icone {
+  font-size: 44px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.tutorial-titulo {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.tutorial-descricao {
+  margin: 0;
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.65;
+}
+
+.tutorial-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tutorial-lista-item {
+  font-size: 14px;
+  color: #374151;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 14px;
+  line-height: 1.4;
+}
+
+.tutorial-dica {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.5;
+}
+
+.tutorial-dica-icone {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tutorial-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 24px 4px;
+}
+
+.tutorial-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: none;
+  background: #e5e7eb;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, width 0.2s;
+}
+
+.tutorial-dot--ativo {
+  background: #16a34a;
+  width: 22px;
+}
+
+.tutorial-dot--feito {
+  background: #86efac;
+}
+
+.tutorial-rodape {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px 24px;
+  gap: 12px;
+}
+
+.tutorial-btn-voltar {
+  padding: 10px 20px;
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.tutorial-btn-voltar:hover:not(:disabled) { background: #f9fafb; }
+.tutorial-btn-voltar:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.tutorial-btn-avancar {
+  padding: 10px 28px;
+  background: #16a34a;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+  flex: 1;
+  max-width: 200px;
+}
+
+.tutorial-btn-avancar:hover { opacity: 0.9; }
+
 /* Responsivo */
 
 @media (max-width: 768px) {
@@ -1239,4 +1447,7 @@ body {
   .botao-novo { margin-left: 0; }
   .parcela-linha { grid-template-columns: 1fr 1fr; }
   .login-card { padding: 36px 24px 28px; }
+  .tutorial-card { border-radius: 16px; }
+  .tutorial-corpo { padding: 20px 20px 16px; min-height: auto; }
+  .tutorial-rodape { padding: 12px 20px 20px; }
 }
