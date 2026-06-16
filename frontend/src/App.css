@@ -540,3 +540,449 @@ body {
   font-size: 13px;
   margin: 0;
 }
+
+/* ============================================
+   Etapa 4 — Layout com Sidebar
+   ============================================ */
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: #111827;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 16px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #16a34a;
+  border-bottom: 1px solid #1f2937;
+  letter-spacing: -0.02em;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  flex: 1;
+}
+
+.sidebar-nav button {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  text-align: left;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: color 0.15s, background 0.15s;
+  width: 100%;
+}
+
+.sidebar-nav button:hover {
+  color: white;
+  background: #1f2937;
+}
+
+.sidebar-nav button.nav-ativo {
+  color: white;
+  background: #1f2937;
+  border-left-color: #16a34a;
+}
+
+.sidebar-secao {
+  display: block;
+  padding: 16px 20px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.conteudo-principal {
+  flex: 1;
+  overflow-y: auto;
+  background: #f6fafb;
+  min-width: 0;
+}
+
+/* ============================================
+   CRUD — Tabela
+   ============================================ */
+
+.crud-pagina {
+  padding: 32px;
+  max-width: 1100px;
+}
+
+.crud-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.crud-titulo {
+  margin: 0;
+  font-size: 22px;
+  color: #111827;
+}
+
+.crud-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.crud-input-busca {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  min-width: 200px;
+  font-family: inherit;
+}
+
+.crud-input-busca:focus {
+  outline: none;
+  border-color: #16a34a;
+}
+
+.crud-select {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.botao-buscar {
+  padding: 8px 18px;
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.botao-buscar:hover { opacity: 0.85; }
+.botao-buscar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.botao-todos {
+  padding: 8px 18px;
+  background: white;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.botao-todos:hover { background: #f9fafb; }
+
+.botao-novo {
+  padding: 8px 18px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: auto;
+  font-family: inherit;
+}
+
+.botao-novo:hover { opacity: 0.9; }
+
+.crud-tabela-wrapper {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.crud-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.crud-tabela th {
+  background: #f9fafb;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.crud-tabela th.ordenavel {
+  cursor: pointer;
+  user-select: none;
+}
+
+.crud-tabela th.ordenavel:hover { color: #111827; }
+
+.crud-tabela th.ativo-ord { color: #16a34a; }
+
+.crud-tabela td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+}
+
+.crud-tabela tr:last-child td { border-bottom: none; }
+.crud-tabela tbody tr:hover td { background: #f9fafb; }
+
+.crud-vazio {
+  text-align: center;
+  padding: 48px;
+  color: #9ca3af;
+  font-size: 15px;
+}
+
+.acoes-celula {
+  display: flex;
+  gap: 8px;
+}
+
+.botao-editar {
+  padding: 5px 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.botao-editar:hover { background: #dbeafe; }
+
+.botao-excluir {
+  padding: 5px 12px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.botao-excluir:hover { background: #fee2e2; }
+
+/* ============================================
+   CRUD — Modal de Formulário
+   ============================================ */
+
+.form-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+
+.form-modal-card {
+  background: white;
+  border-radius: 14px;
+  padding: 32px;
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-modal-titulo {
+  margin: 0;
+  font-size: 20px;
+  color: #111827;
+}
+
+.form-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-input,
+.form-select {
+  padding: 9px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #16a34a;
+}
+
+.form-modal-rodape {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.botao-cancelar {
+  padding: 9px 20px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  color: #374151;
+  font-family: inherit;
+}
+
+.botao-cancelar:hover { background: #f9fafb; }
+
+.botao-salvar {
+  padding: 9px 20px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.botao-salvar:hover { opacity: 0.9; }
+.botao-salvar:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Seção de parcelas */
+
+.parcelas-secao {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.parcelas-titulo {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.parcela-linha {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.botao-remover-parcela {
+  padding: 9px 12px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.botao-add-parcela {
+  padding: 7px 14px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  font-family: inherit;
+}
+
+/* Badges de tipo */
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge--despesa,
+.badge--apagar   { background: #fef2f2; color: #dc2626; }
+
+.badge--receita,
+.badge--areceber { background: #f0fdf4; color: #16a34a; }
+
+.badge--fornecedor { background: #eff6ff; color: #1d4ed8; }
+.badge--cliente    { background: #fefce8; color: #a16207; }
+.badge--faturado   { background: #faf5ff; color: #7e22ce; }
+
+/* Responsivo */
+
+@media (max-width: 768px) {
+  .app-layout { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; }
+  .sidebar-nav { flex-direction: row; flex-wrap: wrap; padding: 8px; }
+  .sidebar-nav button { border-left: none; border-bottom: 3px solid transparent; }
+  .sidebar-nav button.nav-ativo { border-left: none; border-bottom-color: #16a34a; }
+  .crud-pagina { padding: 16px; }
+  .botao-novo { margin-left: 0; }
+  .parcela-linha { grid-template-columns: 1fr 1fr; }
+}
