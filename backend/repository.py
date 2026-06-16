@@ -141,3 +141,287 @@ def criar_parcela(id_mov, dados):
             novo_id = _fetch_id(cur, "PARCELACONTAS")
         conn.commit()
     return novo_id
+
+
+# ─────────────────────────────────────────────────────────────
+# CRUD — Pessoas
+# ─────────────────────────────────────────────────────────────
+
+def _rows_to_list(cur):
+    colunas = [d[0] for d in cur.description]
+    return [dict(zip(colunas, row)) for row in cur.fetchall()]
+
+
+def _row_to_dict(cur, row):
+    if row is None:
+        return None
+    colunas = [d[0] for d in cur.description]
+    return dict(zip(colunas, row))
+
+
+def listar_pessoas(q=None, tipo=None):
+    params = []
+    where = ["ativo = TRUE"]
+    if q:
+        where.append("(razao_social ILIKE %s OR cpf_cnpj ILIKE %s)")
+        params += [f"%{q}%", f"%{q}%"]
+    if tipo:
+        where.append("tipo = %s")
+        params.append(tipo)
+    sql = f"SELECT id, tipo, razao_social, cpf_cnpj, ativo FROM PESSOAS WHERE {' AND '.join(where)} ORDER BY razao_social"
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+            return _rows_to_list(cur)
+
+
+def obter_pessoa(id):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, tipo, razao_social, cpf_cnpj, ativo FROM PESSOAS WHERE id = %s", (id,))
+            return _row_to_dict(cur, cur.fetchone())
+
+
+def inserir_pessoa(dados):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO PESSOAS (tipo, razao_social, cpf_cnpj, ativo) VALUES (%s, %s, %s, TRUE) RETURNING id",
+                (dados.get("tipo"), dados.get("razao_social"), dados.get("cpf_cnpj"))
+            )
+            novo_id = _fetch_id(cur, "PESSOAS")
+        conn.commit()
+    return novo_id
+
+
+def atualizar_pessoa(id, dados):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE PESSOAS SET tipo=%s, razao_social=%s, cpf_cnpj=%s WHERE id=%s",
+                (dados.get("tipo"), dados.get("razao_social"), dados.get("cpf_cnpj"), id)
+            )
+            atualizado = cur.rowcount > 0
+        conn.commit()
+    return atualizado
+
+
+def desativar_pessoa(id):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE PESSOAS SET ativo=FALSE WHERE id=%s", (id,))
+            atualizado = cur.rowcount > 0
+        conn.commit()
+    return atualizado
+
+
+# ─────────────────────────────────────────────────────────────
+# CRUD — Classificação
+# ─────────────────────────────────────────────────────────────
+
+def listar_classificacoes(q=None, tipo=None):
+    params = []
+    where = ["ativo = TRUE"]
+    if q:
+        where.append("descricao ILIKE %s")
+        params.append(f"%{q}%")
+    if tipo:
+        where.append("tipo = %s")
+        params.append(tipo)
+    sql = f"SELECT id, tipo, descricao, ativo FROM CLASSIFICACAO WHERE {' AND '.join(where)} ORDER BY descricao"
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+            return _rows_to_list(cur)
+
+
+def obter_classificacao(id):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, tipo, descricao, ativo FROM CLASSIFICACAO WHERE id = %s", (id,))
+            return _row_to_dict(cur, cur.fetchone())
+
+
+def inserir_classificacao(dados):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO CLASSIFICACAO (tipo, descricao, ativo) VALUES (%s, %s, TRUE) RETURNING id",
+                (dados.get("tipo"), dados.get("descricao"))
+            )
+            novo_id = _fetch_id(cur, "CLASSIFICACAO")
+        conn.commit()
+    return novo_id
+
+
+def atualizar_classificacao(id, dados):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE CLASSIFICACAO SET tipo=%s, descricao=%s WHERE id=%s",
+                (dados.get("tipo"), dados.get("descricao"), id)
+            )
+            atualizado = cur.rowcount > 0
+        conn.commit()
+    return atualizado
+
+
+def desativar_classificacao(id):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE CLASSIFICACAO SET ativo=FALSE WHERE id=%s", (id,))
+            atualizado = cur.rowcount > 0
+        conn.commit()
+    return atualizado
+
+
+# ─────────────────────────────────────────────────────────────
+# CRUD — MovimentoContas
+# ─────────────────────────────────────────────────────────────
+
+def listar_movimentos(q=None, tipo=None):
+    params = []
+    where = ["m.ativo = TRUE"]
+    if q:
+        where.append(
+            "(pf.razao_social ILIKE %s OR pt.razao_social ILIKE %s "
+            "OR c.descricao ILIKE %s OR CAST(m.valor_total AS TEXT) ILIKE %s)"
+        )
+        params += [f"%{q}%"] * 4
+    if tipo:
+        where.append("m.tipo = %s")
+        params.append(tipo)
+    sql = f"""
+        SELECT m.id, m.tipo, m.valor_total, m.data_emissao, m.ativo,
+               pf.razao_social AS fornecedor_nome,
+               pt.razao_social AS faturado_nome,
+               c.descricao     AS classificacao_descricao,
+               m.id_fornecedor, m.id_faturado, m.id_classificacao
+        FROM MOVIMENTOCONTAS m
+        LEFT JOIN PESSOAS pf ON m.id_fornecedor = pf.id
+        LEFT JOIN PESSOAS pt ON m.id_faturado   = pt.id
+        LEFT JOIN CLASSIFICACAO c ON m.id_classificacao = c.id
+        WHERE {' AND '.join(where)}
+        ORDER BY m.data_emissao DESC
+    """
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+            rows = _rows_to_list(cur)
+    for r in rows:
+        if r.get("valor_total") is not None:
+            r["valor_total"] = float(r["valor_total"])
+        if r.get("data_emissao") is not None:
+            r["data_emissao"] = r["data_emissao"].isoformat()
+    return rows
+
+
+def obter_movimento_completo(id):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT m.id, m.tipo, m.valor_total, m.data_emissao, m.ativo,
+                       pf.razao_social AS fornecedor_nome,
+                       pt.razao_social AS faturado_nome,
+                       c.descricao     AS classificacao_descricao,
+                       m.id_fornecedor, m.id_faturado, m.id_classificacao
+                FROM MOVIMENTOCONTAS m
+                LEFT JOIN PESSOAS pf ON m.id_fornecedor = pf.id
+                LEFT JOIN PESSOAS pt ON m.id_faturado   = pt.id
+                LEFT JOIN CLASSIFICACAO c ON m.id_classificacao = c.id
+                WHERE m.id = %s
+                """,
+                (id,)
+            )
+            mov = _row_to_dict(cur, cur.fetchone())
+        if mov is None:
+            return None
+        if mov.get("valor_total") is not None:
+            mov["valor_total"] = float(mov["valor_total"])
+        if mov.get("data_emissao") is not None:
+            mov["data_emissao"] = mov["data_emissao"].isoformat()
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, identificacao, data_vencimento, valor, ativo FROM PARCELACONTAS WHERE id_movimento=%s AND ativo=TRUE ORDER BY id",
+                (id,)
+            )
+            parcelas = _rows_to_list(cur)
+        for p in parcelas:
+            if p.get("valor") is not None:
+                p["valor"] = float(p["valor"])
+            if p.get("data_vencimento") is not None:
+                p["data_vencimento"] = p["data_vencimento"].isoformat()
+        mov["parcelas"] = parcelas
+    return mov
+
+
+def inserir_movimento_crud(dados):
+    parcelas = dados.get("parcelas", [])
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO MOVIMENTOCONTAS
+                    (tipo, id_fornecedor, id_faturado, id_classificacao, valor_total, data_emissao)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (
+                    dados.get("tipo"),
+                    dados.get("id_fornecedor"),
+                    dados.get("id_faturado"),
+                    dados.get("id_classificacao"),
+                    dados.get("valor_total"),
+                    _normalizar_data(dados.get("data_emissao")),
+                )
+            )
+            id_mov = _fetch_id(cur, "MOVIMENTOCONTAS")
+            for i, p in enumerate(parcelas, start=1):
+                identificacao = p.get("identificacao") or f"MOV{id_mov}-PARC{i}"
+                cur.execute(
+                    "INSERT INTO PARCELACONTAS (id_movimento, identificacao, data_vencimento, valor) VALUES (%s, %s, %s, %s)",
+                    (id_mov, identificacao, _normalizar_data(p.get("data_vencimento")), p.get("valor"))
+                )
+            if not parcelas:
+                cur.execute(
+                    "INSERT INTO PARCELACONTAS (id_movimento, identificacao, data_vencimento, valor) VALUES (%s, %s, %s, %s)",
+                    (id_mov, f"MOV{id_mov}-PARC1", _normalizar_data(dados.get("data_emissao")), dados.get("valor_total"))
+                )
+        conn.commit()
+    return id_mov
+
+
+def atualizar_movimento_crud(id, dados):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE MOVIMENTOCONTAS
+                SET tipo=%s, id_fornecedor=%s, id_faturado=%s,
+                    id_classificacao=%s, valor_total=%s, data_emissao=%s
+                WHERE id=%s
+                """,
+                (
+                    dados.get("tipo"),
+                    dados.get("id_fornecedor"),
+                    dados.get("id_faturado"),
+                    dados.get("id_classificacao"),
+                    dados.get("valor_total"),
+                    _normalizar_data(dados.get("data_emissao")),
+                    id,
+                )
+            )
+            atualizado = cur.rowcount > 0
+        conn.commit()
+    return atualizado
+
+
+def desativar_movimento(id):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE MOVIMENTOCONTAS SET ativo=FALSE WHERE id=%s", (id,))
+            atualizado = cur.rowcount > 0
+            cur.execute("UPDATE PARCELACONTAS SET ativo=FALSE WHERE id_movimento=%s", (id,))
+        conn.commit()
+    return atualizado
