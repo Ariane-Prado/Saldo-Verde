@@ -40,11 +40,11 @@ Abra: **http://localhost:3000**
 
 ## Como fazer login
 
-Na tela de login, clique em um dos acessos disponíveis para preencher automaticamente, depois clique em **Entrar**.
+Na tela de login, clique no acesso disponível para preencher automaticamente, depois clique em **Entrar**.
 
 | Usuário | Senha |
 |---|---|
-
+| `admin` | `admin123` |
 
 Após o login, um tutorial interativo abre automaticamente mostrando todas as funcionalidades. Você pode pulá-lo e reabrir a qualquer momento pelo menu lateral.
 

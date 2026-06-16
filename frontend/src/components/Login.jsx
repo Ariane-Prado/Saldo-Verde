@@ -1,8 +1,7 @@
 import { useState } from 'react'
 
 const USUARIOS = [
-  { login: 'admin',      senha: 'admin123',   nome: 'Administrador' },
-  { login: 'ariane',     senha: 'verde2025',  nome: 'Ariane Prado'  },
+  { login: 'admin', senha: 'admin123', nome: 'Administrador' },
 ]
 
 export default function Login({ onLogin }) {
