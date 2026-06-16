@@ -55,10 +55,7 @@ def _get_gemini_client():
     global gemini_client
     chave = config.get_gemini_key() or GEMINI_API_KEY
     if gemini_client is None and chave:
-        gemini_client = genai.Client(
-            api_key=chave,
-            http_options={"api_version": "v1"},
-        )
+        gemini_client = genai.Client(api_key=chave)
     return gemini_client
 
 
