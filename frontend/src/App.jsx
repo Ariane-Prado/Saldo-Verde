@@ -90,7 +90,7 @@ function App() {
           <button className="sidebar-sair-btn" onClick={sair}>Sair</button>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" data-tutorial="sidebar">
           {secoes.map(secao => (
             <div key={secao}>
               <span className="sidebar-secao">{secao}</span>
@@ -99,6 +99,7 @@ function App() {
                   key={item.id}
                   className={pagina === item.id ? 'nav-ativo' : ''}
                   onClick={() => navegar(item.id)}
+                  data-tutorial={`nav-${item.id}`}
                 >
                   {item.rotulo}
                 </button>
@@ -107,7 +108,7 @@ function App() {
           ))}
 
           <span className="sidebar-secao">Ajuda</span>
-          <button onClick={() => setTutorialAberto(true)}>
+          <button onClick={() => setTutorialAberto(true)} data-tutorial="nav-tutorial">
             📖 Tutorial
           </button>
         </nav>
@@ -116,6 +117,7 @@ function App() {
           className="sidebar-chave-btn"
           onClick={() => setModalChave(true)}
           title={chaveOk ? 'Chave configurada — clique para alterar' : 'Configurar chave API'}
+          data-tutorial="chave-btn"
         >
           <IconeChave ativo={chaveOk} />
           <span style={{ color: chaveOk ? '#16a34a' : '#6b7280' }}>

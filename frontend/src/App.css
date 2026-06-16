@@ -1234,23 +1234,41 @@ body {
 .tutorial-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 300;
-  padding: 24px;
 }
 
+.tutorial-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Card positioned to the right when a sidebar element is targeted */
 .tutorial-card {
+  position: absolute;
   background: white;
   border-radius: 20px;
-  width: 100%;
-  max-width: 520px;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  z-index: 10;
+}
+
+.tutorial-card--lateral {
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(400px, calc(50vw - 60px));
+}
+
+.tutorial-card--centro {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, calc(100% - 80px));
 }
 
 .tutorial-topo {
@@ -1305,13 +1323,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: 280px;
-}
-
-.tutorial-icone {
-  font-size: 44px;
-  line-height: 1;
-  margin-bottom: 4px;
+  min-height: 220px;
 }
 
 .tutorial-titulo {
@@ -1361,10 +1373,10 @@ body {
   line-height: 1.5;
 }
 
-.tutorial-dica-icone {
-  font-size: 16px;
+.tutorial-dica-label {
+  font-weight: 700;
   flex-shrink: 0;
-  margin-top: 1px;
+  color: #16a34a;
 }
 
 .tutorial-dots {
@@ -1447,7 +1459,15 @@ body {
   .botao-novo { margin-left: 0; }
   .parcela-linha { grid-template-columns: 1fr 1fr; }
   .login-card { padding: 36px 24px 28px; }
-  .tutorial-card { border-radius: 16px; }
+  .tutorial-card--lateral,
+  .tutorial-card--centro {
+    right: auto;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 40px);
+    max-width: 440px;
+  }
   .tutorial-corpo { padding: 20px 20px 16px; min-height: auto; }
   .tutorial-rodape { padding: 12px 20px 20px; }
 }
