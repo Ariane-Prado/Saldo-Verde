@@ -111,4 +111,4 @@ docker compose down -v
 - Ariane Prado
 - Rafael Paiva
 
-Universidade de Rio Verde — Projeto N3, 2025
+Universidade de Rio Verde — Projeto N3, 2026
