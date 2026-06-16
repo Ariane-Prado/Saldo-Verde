@@ -25,7 +25,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 _EMBED_MODEL        = "models/gemini-embedding-2"
 _EMBED_DIM          = 3072
-_SCORE_THRESHOLD    = 0.30        # cosine similarity mínimo aceitável
+_SCORE_THRESHOLD    = 0.15        # cosine similarity mínimo aceitável
 _MAX_CONTEXT_CHARS  = 40_000      # ~10k tokens — seguro para Gemini 2.5 Flash
 
 _INDEX_PATH = os.path.join(os.path.dirname(__file__), "faiss.index")
@@ -680,7 +680,17 @@ def consultar_rag_embeddings(pergunta: str, top_k: int = 30) -> str:
     contexto_faiss = _recuperar_contexto_faiss(pergunta, top_k=top_k, subset_ids=subset_ids or None)
 
     if not contexto_faiss and not contexto_sql_extra:
-        return "Nenhum registro encontrado no banco de dados."
+        # Fallback: FAISS não encontrou nada — busca todos os registros do banco
+        registros = _buscar_registros(limit=None)
+        if not registros:
+            return "Nenhum registro encontrado no banco de dados."
+        vistos: set[int] = set()
+        linhas: list[str] = []
+        for r in registros:
+            if r["id"] not in vistos:
+                vistos.add(r["id"])
+                linhas.append(_formatar_linha(r))
+        contexto_faiss = _truncar_contexto("\n".join(linhas))
 
     partes: list[str] = []
     if contexto_sql_extra:
