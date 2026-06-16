@@ -2,7 +2,7 @@
 
 Sistema de gestão financeira agrícola com suporte a inteligência artificial para leitura de notas fiscais e consulta por linguagem natural.
 
-Desenvolvido como projeto acadêmico (N3 – Etapa 4) na Universidade de Rio Verde.
+Desenvolvido como projeto acadêmico na Universidade de Rio Verde.
 
 ---
 
