@@ -109,6 +109,10 @@ function App() {
             </div>
           ))}
 
+          <span className="sidebar-secao">Ajuda</span>
+          <button onClick={() => setTutorialAberto(true)} data-tutorial="nav-tutorial">
+            Tutorial
+          </button>
         </nav>
 
         <button
