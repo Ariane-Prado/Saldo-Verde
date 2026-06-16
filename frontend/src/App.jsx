@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import Login from './components/Login'
 import UploadNota from './components/UploadNota'
 import ConsultaRAG from './components/ConsultaRAG'
 import ChaveAPIModal from './components/ChaveAPIModal'
@@ -30,10 +31,15 @@ function IconeChave({ ativo }) {
 }
 
 function App() {
+  const [usuarioLogado, setUsuarioLogado] = useState(null)
   const [chaveOk, setChaveOk]           = useState(false)
   const [pagina, setPagina]             = useState('pessoas')
   const [modalAberto, setModalAberto]   = useState(false)
   const [paginaPendente, setPaginaPendente] = useState(null)
+
+  if (!usuarioLogado) {
+    return <Login onLogin={nome => setUsuarioLogado(nome)} />
+  }
 
   function navegar(id) {
     if (PAGINAS_IA.includes(id) && !chaveOk) {
@@ -64,6 +70,12 @@ function App() {
     <div className="app-layout">
       <aside className="sidebar">
         <div className="sidebar-logo">Saldo Verde</div>
+        <div className="sidebar-usuario">
+          <span className="sidebar-usuario-nome">{usuarioLogado}</span>
+          <button className="sidebar-sair-btn" onClick={() => { setUsuarioLogado(null); setChaveOk(false); setPagina('pessoas') }}>
+            Sair
+          </button>
+        </div>
 
         <nav className="sidebar-nav">
           {secoes.map(secao => (
