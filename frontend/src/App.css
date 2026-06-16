@@ -614,6 +614,26 @@ body {
   color: #6b7280;
 }
 
+.sidebar-chave-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: auto 12px 16px;
+  padding: 8px 12px;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.sidebar-chave-btn:hover {
+  background: #374151;
+}
+
 .conteudo-principal {
   flex: 1;
   overflow-y: auto;
