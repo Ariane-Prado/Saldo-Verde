@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import Login from './components/Login'
+import Tutorial from './components/Tutorial'
 import UploadNota from './components/UploadNota'
 import ConsultaRAG from './components/ConsultaRAG'
 import ChaveAPIModal from './components/ChaveAPIModal'
@@ -31,20 +32,26 @@ function IconeChave({ ativo }) {
 }
 
 function App() {
-  const [usuarioLogado, setUsuarioLogado] = useState(null)
-  const [chaveOk, setChaveOk]           = useState(false)
-  const [pagina, setPagina]             = useState('pessoas')
-  const [modalAberto, setModalAberto]   = useState(false)
+  const [usuarioLogado, setUsuarioLogado]   = useState(null)
+  const [chaveOk, setChaveOk]               = useState(false)
+  const [pagina, setPagina]                 = useState('pessoas')
+  const [modalChave, setModalChave]         = useState(false)
   const [paginaPendente, setPaginaPendente] = useState(null)
+  const [tutorialAberto, setTutorialAberto] = useState(false)
+
+  function handleLogin(nome) {
+    setUsuarioLogado(nome)
+    setTutorialAberto(true)
+  }
 
   if (!usuarioLogado) {
-    return <Login onLogin={nome => setUsuarioLogado(nome)} />
+    return <Login onLogin={handleLogin} />
   }
 
   function navegar(id) {
     if (PAGINAS_IA.includes(id) && !chaveOk) {
       setPaginaPendente(id)
-      setModalAberto(true)
+      setModalChave(true)
       return
     }
     setPagina(id)
@@ -52,16 +59,23 @@ function App() {
 
   function confirmarChave() {
     setChaveOk(true)
-    setModalAberto(false)
+    setModalChave(false)
     if (paginaPendente) {
       setPagina(paginaPendente)
       setPaginaPendente(null)
     }
   }
 
-  function fecharModal() {
-    setModalAberto(false)
+  function fecharModalChave() {
+    setModalChave(false)
     setPaginaPendente(null)
+  }
+
+  function sair() {
+    setUsuarioLogado(null)
+    setChaveOk(false)
+    setPagina('pessoas')
+    setTutorialAberto(false)
   }
 
   const secoes = [...new Set(ITENS_NAV.map(i => i.secao))]
@@ -70,14 +84,13 @@ function App() {
     <div className="app-layout">
       <aside className="sidebar">
         <div className="sidebar-logo">Saldo Verde</div>
+
         <div className="sidebar-usuario">
           <span className="sidebar-usuario-nome">{usuarioLogado}</span>
-          <button className="sidebar-sair-btn" onClick={() => { setUsuarioLogado(null); setChaveOk(false); setPagina('pessoas') }}>
-            Sair
-          </button>
+          <button className="sidebar-sair-btn" onClick={sair}>Sair</button>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" data-tutorial="sidebar">
           {secoes.map(secao => (
             <div key={secao}>
               <span className="sidebar-secao">{secao}</span>
@@ -86,15 +99,26 @@ function App() {
                   key={item.id}
                   className={pagina === item.id ? 'nav-ativo' : ''}
                   onClick={() => navegar(item.id)}
+                  data-tutorial={`nav-${item.id}`}
                 >
                   {item.rotulo}
                 </button>
               ))}
             </div>
           ))}
+
+          <span className="sidebar-secao">Ajuda</span>
+          <button onClick={() => setTutorialAberto(true)} data-tutorial="nav-tutorial">
+            📖 Tutorial
+          </button>
         </nav>
 
-        <button className="sidebar-chave-btn" onClick={() => setModalAberto(true)} title={chaveOk ? 'Chave configurada' : 'Configurar chave API'}>
+        <button
+          className="sidebar-chave-btn"
+          onClick={() => setModalChave(true)}
+          title={chaveOk ? 'Chave configurada — clique para alterar' : 'Configurar chave API'}
+          data-tutorial="chave-btn"
+        >
           <IconeChave ativo={chaveOk} />
           <span style={{ color: chaveOk ? '#16a34a' : '#6b7280' }}>
             {chaveOk ? 'Chave ativa' : 'Sem chave'}
@@ -110,11 +134,12 @@ function App() {
         {pagina === 'contas'        && <ManterContas />}
       </main>
 
-      {modalAberto && (
-        <ChaveAPIModal
-          onConfirmar={confirmarChave}
-          onFechar={fecharModal}
-        />
+      {tutorialAberto && (
+        <Tutorial onFechar={() => setTutorialAberto(false)} />
+      )}
+
+      {modalChave && (
+        <ChaveAPIModal onConfirmar={confirmarChave} onFechar={fecharModalChave} />
       )}
     </div>
   )
