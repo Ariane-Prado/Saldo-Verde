@@ -12,6 +12,9 @@ import repository
 app = Flask(__name__)
 CORS(app)
 
+from database import init_db
+init_db()
+
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
