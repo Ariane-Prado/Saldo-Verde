@@ -45,6 +45,7 @@ export default function ManterClassificacao() {
     setOrdenacao({ campo, direcao })
     setRegistros(prev => [...prev].sort((a, b) => {
       const va = a[campo] ?? ''; const vb = b[campo] ?? ''
+      if (typeof va === 'number' && typeof vb === 'number') return direcao === 'asc' ? va - vb : vb - va
       return direcao === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va))
     }))
   }
