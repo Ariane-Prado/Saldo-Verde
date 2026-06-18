@@ -49,15 +49,15 @@ const PASSOS = [
     alvo: '[data-tutorial="nav-contas"]',
   },
   {
-    titulo: 'Configurar a Chave API',
-    descricao: 'Para usar os recursos de Inteligência Artificial é necessário configurar uma chave da API Google Gemini.',
+    titulo: 'Chave da API Gemini',
+    descricao: 'Os recursos de Inteligência Artificial exigem uma chave da API Google Gemini, configurada via variável de ambiente pelo responsável pelo sistema.',
     lista: [
-      '1. Clique no ícone de chave no rodapé da sidebar',
-      '2. Acesse aistudio.google.com/apikey para obter sua chave gratuita',
-      '3. Cole a chave no campo e clique em "Salvar Chave"',
+      'Localmente: defina GEMINI_API_KEY no docker-compose.yml (seção environment do backend)',
+      'Em produção: configure a variável GEMINI_API_KEY no painel do servidor (ex.: Render)',
+      'Obtenha uma chave gratuita em aistudio.google.com/apikey',
     ],
-    dica: 'O ícone fica verde quando a chave está ativa e cinza quando não configurada.',
-    alvo: '[data-tutorial="chave-btn"]',
+    dica: 'Se Nota Fiscal ou Consulta IA retornarem erro, verifique se GEMINI_API_KEY está definida no ambiente.',
+    alvo: null,
   },
   {
     titulo: 'Upload de Nota Fiscal',
