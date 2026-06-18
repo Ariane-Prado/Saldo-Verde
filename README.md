@@ -75,19 +75,14 @@ Em **Manter Contas**, clique em qualquer linha da tabela para ver o detalhe comp
 
 ## Como configurar a chave de IA (Gemini)
 
-A chave é gratuita e necessária apenas para as funcionalidades de IA.
+A chave é gratuita e necessária apenas para as funcionalidades de IA. Ela é informada diretamente na interface (não depende de variável de ambiente), por isso funciona da mesma forma local e em produção (Render).
 
 1. Acesse [aistudio.google.com/apikey](https://aistudio.google.com/apikey) e gere uma chave
-2. Defina a variável de ambiente `GEMINI_API_KEY` antes de subir o sistema
+2. No sistema, clique no botão de **chave** no rodapé do menu lateral (ou tente acessar Nota Fiscal/Consulta IA)
+3. Cole a chave e clique em **Salvar Chave**
+4. O botão ficará verde confirmando que está ativa — a mesma chave vale para Nota Fiscal e Consulta IA
 
-**Localmente (Docker):** adicione na seção `environment` do serviço backend no `docker-compose.yml`:
-
-```yaml
-environment:
-  GEMINI_API_KEY: sua_chave_aqui
-```
-
-**Em produção (Render):** configure a variável `GEMINI_API_KEY` no painel de variáveis de ambiente do serviço.
+> A chave é mantida apenas em memória no servidor durante a sessão. Ao clicar em **Sair**, ela é esquecida e precisa ser informada novamente no próximo login.
 
 ---
 

@@ -1,9 +1,11 @@
+import calendar
 import json
 import logging
 import os
 import re
 import threading
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 
 import faiss
 import numpy as np
@@ -38,6 +40,10 @@ _KEYWORDS_AGREGACAO = [
     "mais alto", "mais baixo", "mais caro", "mais barato",
     "maior valor", "menor valor", "valor mais", "nota mais",
     "mais alta", "mais cara",
+    # Perguntas de contagem/ranking por frequência (ex: "fornecedores com mais movimentações")
+    "mais movimentações", "menos movimentações", "mais notas", "menos notas",
+    "mais compras", "menos compras", "mais vendas", "menos vendas",
+    "tem mais", "têm mais", "tem menos", "têm menos",
 ]
 
 _KEYWORDS_SEMANTICO = [
@@ -45,6 +51,25 @@ _KEYWORDS_SEMANTICO = [
     "pragas", "doenças", "corretivos", "neutralizadores", "tipo de",
     "para que serve", "utilizado para", "itens",
 ]
+
+_MESES = {
+    "janeiro": 1, "fevereiro": 2, "março": 3, "marco": 3, "abril": 4,
+    "maio": 5, "junho": 6, "julho": 7, "agosto": 8, "setembro": 9,
+    "outubro": 10, "novembro": 11, "dezembro": 12,
+}
+
+_ORDINAIS = {
+    "primeiro": 1, "primeira": 1,
+    "segundo": 2, "segunda": 2,
+    "terceiro": 3, "terceira": 3,
+    "quarto": 4, "quarta": 4,
+    "quinto": 5, "quinta": 5,
+    "sexto": 6, "sexta": 6,
+    "sétimo": 7, "sétima": 7, "setimo": 7, "setima": 7,
+    "oitavo": 8, "oitava": 8,
+    "nono": 9, "nona": 9,
+    "décimo": 10, "décima": 10, "decimo": 10, "decima": 10,
+}
 
 # ── Cliente Gemini ─────────────────────────────────────────────────────────────
 
@@ -64,6 +89,9 @@ def _get_gemini_client():
 @dataclass
 class Entidades:
     ano: int | None = None
+    data_inicio: date | None = None       # início do período identificado na pergunta
+    data_fim: date | None = None          # fim do período identificado na pergunta
+    periodo_label: str | None = None      # rótulo legível do período (ex: "março/2025")
     documento: str | None = None          # CPF ou CNPJ formatado
     nome_entidade: str | None = None      # nome de pessoa/empresa
     classificacao_mencionada: str | None = None
@@ -94,6 +122,71 @@ def _carregar_categorias() -> list[str]:
     return _categorias_cache
 
 
+def _extrair_periodo(pergunta: str, ano_explicito: int | None) -> tuple[date | None, date | None, str | None]:
+    """Identifica um intervalo de datas a partir de termos de mês/trimestre/relativos na pergunta."""
+    p = pergunta.lower()
+    hoje = date.today()
+
+    for nome, num in _MESES.items():
+        if nome in p:
+            ano = ano_explicito or hoje.year
+            ultimo_dia = calendar.monthrange(ano, num)[1]
+            return date(ano, num, 1), date(ano, num, ultimo_dia), f"{nome}/{ano}"
+
+    if "este mês" in p or "esse mês" in p or "mês atual" in p:
+        ultimo_dia = calendar.monthrange(hoje.year, hoje.month)[1]
+        return date(hoje.year, hoje.month, 1), date(hoje.year, hoje.month, ultimo_dia), "este mês"
+
+    if "mês passado" in p or "mes passado" in p:
+        primeiro_atual = hoje.replace(day=1)
+        fim = primeiro_atual - timedelta(days=1)
+        return fim.replace(day=1), fim, "mês passado"
+
+    if "última semana" in p or "ultima semana" in p:
+        return hoje - timedelta(days=7), hoje, "última semana"
+
+    if "últimos 30 dias" in p or "ultimos 30 dias" in p:
+        return hoje - timedelta(days=30), hoje, "últimos 30 dias"
+
+    m = re.search(r'(primeiro|segundo|terceiro|quarto|último|ultimo)\s+trimestre', p)
+    if m:
+        termo = m.group(1)
+        ano = ano_explicito or hoje.year
+        mapa_tri = {"primeiro": 1, "segundo": 2, "terceiro": 3, "quarto": 4}
+        tri = mapa_tri.get(termo, (hoje.month - 1) // 3 + 1)
+        mes_ini = (tri - 1) * 3 + 1
+        mes_fim = mes_ini + 2
+        ultimo_dia = calendar.monthrange(ano, mes_fim)[1]
+        return date(ano, mes_ini, 1), date(ano, mes_fim, ultimo_dia), f"{tri}º trimestre de {ano}"
+
+    if "este ano" in p or "esse ano" in p or "ano atual" in p:
+        return date(hoje.year, 1, 1), date(hoje.year, 12, 31), f"ano {hoje.year}"
+
+    if "ano passado" in p:
+        return date(hoje.year - 1, 1, 1), date(hoje.year - 1, 12, 31), f"ano {hoje.year - 1}"
+
+    if ano_explicito:
+        return date(ano_explicito, 1, 1), date(ano_explicito, 12, 31), f"ano {ano_explicito}"
+
+    return None, None, None
+
+
+def _extrair_top_n(pergunta: str, minimo: int = 5, maximo: int = 20) -> int:
+    """Detecta um N explícito (ex: 'top 10', 'as 8 maiores', 'décimo maior') para rankings."""
+    p = pergunta.lower()
+    n = minimo
+
+    for m in re.finditer(r'top\s*(\d{1,2})', p):
+        n = max(n, int(m.group(1)))
+    for m in re.finditer(r'(\d{1,2})\s*(?:maiores|menores|º|ª)', p):
+        n = max(n, int(m.group(1)))
+    for palavra, valor in _ORDINAIS.items():
+        if palavra in p:
+            n = max(n, valor)
+
+    return min(n, maximo)
+
+
 def _extrair_entidades(pergunta: str) -> Entidades:
     p = pergunta.lower()
     ent = Entidades()
@@ -102,6 +195,8 @@ def _extrair_entidades(pergunta: str) -> Entidades:
     m = re.search(r'\b(20\d{2})\b', pergunta)
     if m:
         ent.ano = int(m.group(1))
+
+    ent.data_inicio, ent.data_fim, ent.periodo_label = _extrair_periodo(pergunta, ent.ano)
 
     # CPF
     m = re.search(r'\d{3}\.\d{3}\.\d{3}-\d{2}', pergunta)
@@ -186,9 +281,9 @@ def _buscar_ids_filtrados(entidades: Entidades) -> set[int]:
     conds: list[str] = ["m.ativo = TRUE"]
     params: list = []
 
-    if entidades.ano:
-        conds.append("EXTRACT(YEAR FROM m.data_emissao) = %s")
-        params.append(entidades.ano)
+    if entidades.data_inicio and entidades.data_fim:
+        conds.append("m.data_emissao BETWEEN %s AND %s")
+        params.extend([entidades.data_inicio, entidades.data_fim])
     if entidades.documento:
         conds.append("(forn.cpf_cnpj = %s OR fat.cpf_cnpj = %s)")
         params.extend([entidades.documento, entidades.documento])
@@ -267,18 +362,25 @@ def _buscar_contexto_agregado(pergunta: str, entidades: Entidades) -> str:
         t in p
         for t in ["vencerão", "vencem", "vencimento", "parcelas futuras", "parcela", "parcelas"]
     )
+    top_n = _extrair_top_n(pergunta)
 
     cond_mov: list[str] = ["m.ativo = TRUE"]
     par_mov: list = []
-    if entidades.ano:
-        cond_mov.append("EXTRACT(YEAR FROM m.data_emissao) = %s")
-        par_mov.append(entidades.ano)
+    if entidades.data_inicio and entidades.data_fim:
+        cond_mov.append("m.data_emissao BETWEEN %s AND %s")
+        par_mov.extend([entidades.data_inicio, entidades.data_fim])
     if entidades.documento:
         cond_mov.append("(forn.cpf_cnpj = %s OR fat.cpf_cnpj = %s)")
         par_mov.extend([entidades.documento, entidades.documento])
+    if entidades.classificacao_mencionada:
+        cond_mov.append("cl.descricao ILIKE %s")
+        par_mov.append(f"%{entidades.classificacao_mencionada}%")
+    if entidades.nome_entidade:
+        cond_mov.append("(forn.razao_social ILIKE %s OR fat.razao_social ILIKE %s)")
+        par_mov.extend([f"%{entidades.nome_entidade}%", f"%{entidades.nome_entidade}%"])
     where_mov = " AND ".join(cond_mov)
 
-    periodo = f"ano {entidades.ano}" if entidades.ano else "todo o período"
+    periodo = entidades.periodo_label or "todo o período"
     partes: list[str] = []
 
     conn = database.get_connection()
@@ -287,14 +389,20 @@ def _buscar_contexto_agregado(pergunta: str, entidades: Entidades) -> str:
             if sobre_parcelas:
                 cond_parc: list[str] = ["m.ativo = TRUE", "p.ativo = TRUE"]
                 par_parc: list = []
-                if entidades.ano:
-                    cond_parc.append("EXTRACT(YEAR FROM p.data_vencimento) = %s")
-                    par_parc.append(entidades.ano)
+                if entidades.data_inicio and entidades.data_fim:
+                    cond_parc.append("p.data_vencimento BETWEEN %s AND %s")
+                    par_parc.extend([entidades.data_inicio, entidades.data_fim])
                 if entidades.documento:
                     cond_parc.append("(forn.cpf_cnpj = %s OR fat.cpf_cnpj = %s)")
                     par_parc.extend([entidades.documento, entidades.documento])
+                if entidades.classificacao_mencionada:
+                    cond_parc.append("cl.descricao ILIKE %s")
+                    par_parc.append(f"%{entidades.classificacao_mencionada}%")
+                if entidades.nome_entidade:
+                    cond_parc.append("(forn.razao_social ILIKE %s OR fat.razao_social ILIKE %s)")
+                    par_parc.extend([f"%{entidades.nome_entidade}%", f"%{entidades.nome_entidade}%"])
                 where_parc = " AND ".join(cond_parc)
-                label_parc = f"com vencimento em {entidades.ano}" if entidades.ano else "no período consultado"
+                label_parc = f"com vencimento em {entidades.periodo_label}" if entidades.periodo_label else "no período consultado"
 
                 cur.execute(f"""
                     SELECT fat.razao_social, fat.cpf_cnpj,
@@ -303,6 +411,7 @@ def _buscar_contexto_agregado(pergunta: str, entidades: Entidades) -> str:
                     JOIN MOVIMENTOCONTAS m ON m.id = p.id_movimento
                     LEFT JOIN PESSOAS forn ON forn.id = m.id_fornecedor
                     LEFT JOIN PESSOAS fat  ON fat.id  = m.id_faturado
+                    LEFT JOIN CLASSIFICACAO cl ON cl.id = m.id_classificacao
                     WHERE {where_parc}
                     GROUP BY fat.razao_social, fat.cpf_cnpj
                     ORDER BY 3 DESC
@@ -330,6 +439,46 @@ def _buscar_contexto_agregado(pergunta: str, entidades: Entidades) -> str:
                 for desc, tot, qtd in cur.fetchall():
                     partes.append(f"  {desc or '-'}: R$ {tot} ({qtd} parcelas)")
 
+                cur.execute(f"""
+                    SELECT p.id, fat.razao_social, cl.descricao, p.valor, p.data_vencimento
+                    FROM PARCELACONTAS p
+                    JOIN MOVIMENTOCONTAS m ON m.id = p.id_movimento
+                    LEFT JOIN PESSOAS forn ON forn.id = m.id_fornecedor
+                    LEFT JOIN PESSOAS fat  ON fat.id  = m.id_faturado
+                    LEFT JOIN CLASSIFICACAO cl ON cl.id = m.id_classificacao
+                    WHERE {where_parc}
+                    ORDER BY p.valor DESC
+                    LIMIT {top_n}
+                """, par_parc)
+                rows = cur.fetchall()
+                if rows:
+                    partes.append(f"\nTop-{top_n} maiores parcelas individuais ({label_parc}):")
+                    for i, row in enumerate(rows, 1):
+                        partes.append(
+                            f"  #{i}: Parcela#{row[0]} | {row[1] or '-'} | {row[2] or '-'} | "
+                            f"R$ {row[3]} | Venc: {row[4]}"
+                        )
+
+                cur.execute(f"""
+                    SELECT p.id, fat.razao_social, cl.descricao, p.valor, p.data_vencimento
+                    FROM PARCELACONTAS p
+                    JOIN MOVIMENTOCONTAS m ON m.id = p.id_movimento
+                    LEFT JOIN PESSOAS forn ON forn.id = m.id_fornecedor
+                    LEFT JOIN PESSOAS fat  ON fat.id  = m.id_faturado
+                    LEFT JOIN CLASSIFICACAO cl ON cl.id = m.id_classificacao
+                    WHERE {where_parc}
+                    ORDER BY p.valor ASC
+                    LIMIT {top_n}
+                """, par_parc)
+                rows = cur.fetchall()
+                if rows:
+                    partes.append(f"\nTop-{top_n} menores parcelas individuais ({label_parc}):")
+                    for i, row in enumerate(rows, 1):
+                        partes.append(
+                            f"  #{i}: Parcela#{row[0]} | {row[1] or '-'} | {row[2] or '-'} | "
+                            f"R$ {row[3]} | Venc: {row[4]}"
+                        )
+
             else:
                 # Total geral
                 cur.execute(f"""
@@ -337,6 +486,7 @@ def _buscar_contexto_agregado(pergunta: str, entidades: Entidades) -> str:
                     FROM MOVIMENTOCONTAS m
                     LEFT JOIN PESSOAS forn ON forn.id = m.id_fornecedor
                     LEFT JOIN PESSOAS fat  ON fat.id  = m.id_faturado
+                    LEFT JOIN CLASSIFICACAO cl ON cl.id = m.id_classificacao
                     WHERE {where_mov}
                 """, par_mov)
                 total_geral = cur.fetchone()[0]
@@ -348,6 +498,7 @@ def _buscar_contexto_agregado(pergunta: str, entidades: Entidades) -> str:
                     FROM MOVIMENTOCONTAS m
                     LEFT JOIN PESSOAS forn ON forn.id = m.id_fornecedor
                     LEFT JOIN PESSOAS fat  ON fat.id  = m.id_faturado
+                    LEFT JOIN CLASSIFICACAO cl ON cl.id = m.id_classificacao
                     WHERE {where_mov}
                     GROUP BY forn.razao_social
                     ORDER BY 2 DESC
@@ -380,11 +531,31 @@ def _buscar_contexto_agregado(pergunta: str, entidades: Entidades) -> str:
                     LEFT JOIN CLASSIFICACAO cl ON cl.id = m.id_classificacao
                     WHERE {where_mov}
                     ORDER BY m.valor_total DESC
-                    LIMIT 5
+                    LIMIT {top_n}
                 """, par_mov)
                 rows = cur.fetchall()
                 if rows:
-                    partes.append(f"\nTop-5 maiores NFs individuais ({periodo}):")
+                    partes.append(f"\nTop-{top_n} maiores NFs individuais ({periodo}):")
+                    for i, row in enumerate(rows, 1):
+                        partes.append(
+                            f"  #{i}: Mov#{row[0]} | {row[1] or '-'} | {row[2] or '-'} | "
+                            f"R$ {row[3]} | {row[4]}"
+                        )
+
+                # Menor NF individual (ranking completo para suportar "segundo menor" etc.)
+                cur.execute(f"""
+                    SELECT m.id, forn.razao_social, cl.descricao, m.valor_total, m.data_emissao
+                    FROM MOVIMENTOCONTAS m
+                    LEFT JOIN PESSOAS forn ON forn.id = m.id_fornecedor
+                    LEFT JOIN PESSOAS fat  ON fat.id  = m.id_faturado
+                    LEFT JOIN CLASSIFICACAO cl ON cl.id = m.id_classificacao
+                    WHERE {where_mov}
+                    ORDER BY m.valor_total ASC
+                    LIMIT {top_n}
+                """, par_mov)
+                rows = cur.fetchall()
+                if rows:
+                    partes.append(f"\nTop-{top_n} menores NFs individuais ({periodo}):")
                     for i, row in enumerate(rows, 1):
                         partes.append(
                             f"  #{i}: Mov#{row[0]} | {row[1] or '-'} | {row[2] or '-'} | "

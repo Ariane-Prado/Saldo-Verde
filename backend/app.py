@@ -22,6 +22,15 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def home():
     return jsonify({"mensagem": "Backend funcionando"})
 
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    config.set_gemini_key(None)
+    _rag_module.gemini_client = None
+    _md_module.gemini_client = None
+    return jsonify({"ok": True})
+
+
 @app.route("/extrair", methods=["POST"])
 def extrair():
     if "file" not in request.files:
