@@ -64,13 +64,16 @@ def init_db():
                 );
             """)
 
-            # Insere usuário padrão se ainda não existir (credenciais via env vars)
-            admin_email = os.getenv("ADMIN_EMAIL", "admin@saldoverde.com")
-            admin_senha = os.getenv("ADMIN_SENHA", "admin123")
-            cur.execute("""
-                INSERT INTO USUARIOS (email, senha_hash, nome)
-                VALUES (%s, %s, 'Administrador')
-                ON CONFLICT (email) DO NOTHING
-            """, (admin_email, generate_password_hash(admin_senha)))
+            # Insere usuário padrão somente se ADMIN_EMAIL/ADMIN_SENHA estiverem
+            # definidas — sem fallback fraco, para não criar credencial previsível
+            # em ambientes (ex: produção) onde a variável foi esquecida.
+            admin_email = os.getenv("ADMIN_EMAIL")
+            admin_senha = os.getenv("ADMIN_SENHA")
+            if admin_email and admin_senha:
+                cur.execute("""
+                    INSERT INTO USUARIOS (email, senha_hash, nome)
+                    VALUES (%s, %s, 'Administrador')
+                    ON CONFLICT (email) DO NOTHING
+                """, (admin_email, generate_password_hash(admin_senha)))
 
         conn.commit()
