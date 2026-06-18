@@ -97,6 +97,7 @@ class Entidades:
     classificacao_mencionada: str | None = None
     eh_agregacao: bool = False
     eh_semantico: bool = False
+    tipo_movimento: str | None = None     # 'APAGAR' ou 'ARECEBER'
 
 
 # Cache de categorias do banco — carregado na primeira extração
@@ -128,7 +129,7 @@ def _extrair_periodo(pergunta: str, ano_explicito: int | None) -> tuple[date | N
     hoje = date.today()
 
     for nome, num in _MESES.items():
-        if nome in p:
+        if re.search(rf'\b{nome}\b', p):
             ano = ano_explicito or hoje.year
             ultimo_dia = calendar.monthrange(ano, num)[1]
             return date(ano, num, 1), date(ano, num, ultimo_dia), f"{nome}/{ano}"
@@ -230,6 +231,12 @@ def _extrair_entidades(pergunta: str) -> Entidades:
     ent.eh_agregacao = any(kw in p for kw in _KEYWORDS_AGREGACAO)
     ent.eh_semantico = any(kw in p for kw in _KEYWORDS_SEMANTICO)
 
+    # Identifica tipo de conta (A Pagar / A Receber)
+    if any(kw in p for kw in ["pagar", "despesa", "gasto", "gastei", "saída", "saida", "compra"]):
+        ent.tipo_movimento = "APAGAR"
+    elif any(kw in p for kw in ["receber", "receita", "ganho", "faturamento", "entrada", "venda"]):
+        ent.tipo_movimento = "ARECEBER"
+
     logger.info(f"[ENTIDADES] {ent}")
     return ent
 
@@ -293,6 +300,9 @@ def _buscar_ids_filtrados(entidades: Entidades) -> set[int]:
     if entidades.nome_entidade:
         conds.append("(forn.razao_social ILIKE %s OR fat.razao_social ILIKE %s)")
         params.extend([f"%{entidades.nome_entidade}%", f"%{entidades.nome_entidade}%"])
+    if entidades.tipo_movimento:
+        conds.append("m.tipo = %s")
+        params.append(entidades.tipo_movimento)
 
     # Sem filtros objetivos → sem restrição
     if len(conds) == 1:
@@ -316,7 +326,7 @@ def _buscar_ids_filtrados(entidades: Entidades) -> set[int]:
 
     logger.info(f"[PREFILTER] {len(ids)} movimentos encontrados para filtros: ano={entidades.ano}, "
                 f"doc={entidades.documento}, class={entidades.classificacao_mencionada}, "
-                f"nome={entidades.nome_entidade}")
+                f"nome={entidades.nome_entidade}, tipo={entidades.tipo_movimento}")
     return ids
 
 
@@ -378,6 +388,9 @@ def _buscar_contexto_agregado(pergunta: str, entidades: Entidades) -> str:
     if entidades.nome_entidade:
         cond_mov.append("(forn.razao_social ILIKE %s OR fat.razao_social ILIKE %s)")
         par_mov.extend([f"%{entidades.nome_entidade}%", f"%{entidades.nome_entidade}%"])
+    if entidades.tipo_movimento:
+        cond_mov.append("m.tipo = %s")
+        par_mov.append(entidades.tipo_movimento)
     where_mov = " AND ".join(cond_mov)
 
     periodo = entidades.periodo_label or "todo o período"
@@ -401,6 +414,9 @@ def _buscar_contexto_agregado(pergunta: str, entidades: Entidades) -> str:
                 if entidades.nome_entidade:
                     cond_parc.append("(forn.razao_social ILIKE %s OR fat.razao_social ILIKE %s)")
                     par_parc.extend([f"%{entidades.nome_entidade}%", f"%{entidades.nome_entidade}%"])
+                if entidades.tipo_movimento:
+                    cond_parc.append("m.tipo = %s")
+                    par_parc.append(entidades.tipo_movimento)
                 where_parc = " AND ".join(cond_parc)
                 label_parc = f"com vencimento em {entidades.periodo_label}" if entidades.periodo_label else "no período consultado"
 
@@ -770,6 +786,8 @@ def _truncar_contexto(texto: str) -> str:
 
 def _chamar_llm(contexto: str, pergunta: str, modo: str = "agregacao") -> str:
     client = _get_gemini_client()
+    if client is None:
+        raise RuntimeError("Chave API do Gemini não configurada. Configure a chave API no rodapé da barra lateral.")
     contexto = _truncar_contexto(contexto)
 
     # 1. Instruções de Sistema e Segurança (Padrão para RAG Corporativo)
