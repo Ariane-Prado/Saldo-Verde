@@ -1,28 +1,34 @@
 import { useState } from 'react'
 
-const USUARIOS = [
-  { login: 'admin', senha: 'admin123', nome: 'Administrador' },
-]
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
 export default function Login({ onLogin }) {
-  const [login, setLogin]       = useState('')
-  const [senha, setSenha]       = useState('')
-  const [erro, setErro]         = useState(null)
+  const [email, setEmail]         = useState('')
+  const [senha, setSenha]         = useState('')
+  const [erro, setErro]           = useState(null)
   const [carregando, setCarregando] = useState(false)
 
-  function entrar(e) {
+  async function entrar(e) {
     e.preventDefault()
     setErro(null)
     setCarregando(true)
-    setTimeout(() => {
-      const usuario = USUARIOS.find(u => u.login === login.trim() && u.senha === senha)
-      if (usuario) {
-        onLogin(usuario.nome)
+    try {
+      const res = await fetch(`${API}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setErro(json.erro ?? 'Erro ao autenticar.')
       } else {
-        setErro('Usuário ou senha incorretos.')
+        onLogin(json.nome)
       }
+    } catch {
+      setErro('Não foi possível conectar ao servidor.')
+    } finally {
       setCarregando(false)
-    }, 600)
+    }
   }
 
   return (
@@ -43,15 +49,15 @@ export default function Login({ onLogin }) {
 
         <form className="login-form" onSubmit={entrar}>
           <div className="login-grupo">
-            <label className="login-label">Usuário</label>
+            <label className="login-label">E-mail</label>
             <input
               className="login-input"
-              type="text"
-              value={login}
-              onChange={e => setLogin(e.target.value)}
-              placeholder="Digite seu usuário"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="Digite seu e-mail"
               autoFocus
-              autoComplete="username"
+              autoComplete="email"
             />
           </div>
 
@@ -73,21 +79,6 @@ export default function Login({ onLogin }) {
             {carregando ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
-
-        <div className="login-credenciais">
-          <p className="login-credenciais-titulo">Acessos disponíveis</p>
-          <div className="login-credenciais-lista">
-            {USUARIOS.map(u => (
-              <div key={u.login} className="login-credencial-item"
-                onClick={() => { setLogin(u.login); setSenha(u.senha); setErro(null) }}>
-                <span className="login-cred-usuario">{u.login}</span>
-                <span className="login-cred-sep">·</span>
-                <span className="login-cred-senha">{u.senha}</span>
-              </div>
-            ))}
-          </div>
-          <p className="login-credenciais-hint">Clique para preencher automaticamente</p>
-        </div>
 
         <p className="login-rodape">Universidade de Rio Verde — Projeto N3</p>
       </div>

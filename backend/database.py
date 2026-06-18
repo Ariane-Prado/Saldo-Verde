@@ -1,6 +1,7 @@
 import os
 import psycopg2
 from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash
 
 load_dotenv()
 
@@ -53,5 +54,23 @@ def init_db():
                     valor            NUMERIC(15,2),
                     ativo            BOOLEAN NOT NULL DEFAULT TRUE
                 );
+
+                CREATE TABLE IF NOT EXISTS USUARIOS (
+                    id          SERIAL PRIMARY KEY,
+                    email       VARCHAR(255) NOT NULL UNIQUE,
+                    senha_hash  VARCHAR(255) NOT NULL,
+                    nome        VARCHAR(100) NOT NULL,
+                    ativo       BOOLEAN NOT NULL DEFAULT TRUE
+                );
             """)
+
+            # Insere usuário padrão se ainda não existir (credenciais via env vars)
+            admin_email = os.getenv("ADMIN_EMAIL", "admin@saldoverde.com")
+            admin_senha = os.getenv("ADMIN_SENHA", "admin123")
+            cur.execute("""
+                INSERT INTO USUARIOS (email, senha_hash, nome)
+                VALUES (%s, %s, 'Administrador')
+                ON CONFLICT (email) DO NOTHING
+            """, (admin_email, generate_password_hash(admin_senha)))
+
         conn.commit()

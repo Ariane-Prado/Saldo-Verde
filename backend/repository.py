@@ -403,7 +403,8 @@ def atualizar_movimento_crud(id, dados):
                 """
                 UPDATE MOVIMENTOCONTAS
                 SET tipo=%s, id_fornecedor=%s, id_faturado=%s,
-                    id_classificacao=%s, valor_total=%s, data_emissao=%s
+                    id_classificacao=%s, valor_total=%s, data_emissao=%s,
+                    descricao_itens=%s
                 WHERE id=%s
                 """,
                 (
@@ -413,6 +414,7 @@ def atualizar_movimento_crud(id, dados):
                     dados.get("id_classificacao"),
                     dados.get("valor_total"),
                     _normalizar_data(dados.get("data_emissao")),
+                    dados.get("descricao_itens"),
                     id,
                 )
             )

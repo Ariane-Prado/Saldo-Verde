@@ -134,6 +134,7 @@ export default function ManterContas() {
       id_classificacao: dados.id_classificacao ? Number(dados.id_classificacao) : null,
       valor_total:      dados.valor_total ? Number(dados.valor_total) : null,
       data_emissao:     dados.data_emissao || null,
+      descricao_itens:  dados.descricao_itens  || null,
       parcelas:         parcelas.filter(p => p.valor).map(p => ({
         identificacao:   p.identificacao   || undefined,
         data_vencimento: p.data_vencimento || undefined,
@@ -242,6 +243,12 @@ export default function ManterContas() {
                 <span className="detalhe-label">Data de Emissão</span>
                 <span className="detalhe-valor">{fmtData(detalhando.data_emissao)}</span>
               </div>
+              {detalhando.descricao_itens && (
+                <div className="detalhe-item" style={{ gridColumn: '1 / -1' }}>
+                  <span className="detalhe-label">Descrição dos Itens</span>
+                  <span className="detalhe-valor">{detalhando.descricao_itens}</span>
+                </div>
+              )}
             </div>
 
             {detalhando.parcelas?.length > 0 && (
@@ -332,6 +339,14 @@ export default function ManterContas() {
             <input name="data_emissao" type="date" className="form-input"
               defaultValue={editando?.data_emissao ?? ''} />
           </div>
+        </div>
+
+        <div className="form-grupo">
+          <label className="form-label">Descrição dos Itens</label>
+          <textarea name="descricao_itens" className="form-input" rows={3}
+            style={{ resize: 'vertical' }}
+            defaultValue={editando?.descricao_itens ?? ''}
+            placeholder="Descreva os produtos ou serviços desta conta" />
         </div>
 
         <div className="parcelas-secao">

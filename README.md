@@ -40,11 +40,15 @@ Abra: **http://localhost:3000**
 
 ## Como fazer login
 
-Na tela de login, clique no acesso disponível para preencher automaticamente, depois clique em **Entrar**.
+Na tela de login, informe o e-mail e a senha do administrador e clique em **Entrar**.
 
-| Usuário | Senha |
+As credenciais padrão são definidas pelas variáveis de ambiente `ADMIN_EMAIL` e `ADMIN_SENHA` (veja docker-compose.yml). Se não configuradas, os valores padrão são:
+
+| E-mail | Senha |
 |---|---|
-| `admin` | `admin123` |
+| `admin@saldoverde.com` | `admin123` |
+
+> Em produção, defina `ADMIN_EMAIL` e `ADMIN_SENHA` como variáveis de ambiente antes de subir o sistema.
 
 Após o login, um tutorial interativo abre automaticamente mostrando todas as funcionalidades. Você pode pulá-lo e reabrir a qualquer momento pelo menu lateral.
 

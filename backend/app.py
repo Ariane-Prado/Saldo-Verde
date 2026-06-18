@@ -2,12 +2,14 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
+from werkzeug.security import check_password_hash
 from agents.nota_fiscal.consulta_dados import extrair_dados_nota_fiscal
 from agents.rag.consulta_rag import consultar_rag_simples, consultar_rag_embeddings, reset_vector_store
 import agents.rag.consulta_rag as _rag_module
 import agents.nota_fiscal.manipulacao_dados as _md_module
 import config
 import repository
+import database
 
 app = Flask(__name__)
 CORS(app)
@@ -21,6 +23,29 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({"mensagem": "Backend funcionando"})
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    body  = request.get_json(force=True)
+    email = body.get("email", "").strip().lower()
+    senha = body.get("senha", "")
+
+    if not email or not senha:
+        return jsonify({"erro": "E-mail e senha são obrigatórios"}), 400
+
+    with database.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT senha_hash, nome FROM USUARIOS WHERE email = %s AND ativo = TRUE",
+                (email,)
+            )
+            row = cur.fetchone()
+
+    if not row or not check_password_hash(row[0], senha):
+        return jsonify({"erro": "E-mail ou senha incorretos"}), 401
+
+    return jsonify({"ok": True, "nome": row[1]})
 
 
 @app.route("/logout", methods=["POST"])
@@ -66,71 +91,75 @@ def analisar():
     parcelas          = body.get("parcelas", [])
     descricao_itens   = body.get("descricao_itens", "")
 
-    # --- FORNECEDOR ---
-    res_forn = repository.buscar_fornecedor(fornecedor_input.get("cnpj"))
-    if res_forn["existe"]:
-        id_fornecedor = res_forn["id"]
-        forn_resp = {"existe": True, "id": id_fornecedor}
-    else:
-        id_fornecedor = repository.criar_fornecedor(fornecedor_input)
-        forn_resp = {"existe": False, "id_criado": id_fornecedor}
+    try:
+        # --- FORNECEDOR ---
+        res_forn = repository.buscar_fornecedor(fornecedor_input.get("cnpj"))
+        if res_forn["existe"]:
+            id_fornecedor = res_forn["id"]
+            forn_resp = {"existe": True, "id": id_fornecedor}
+        else:
+            id_fornecedor = repository.criar_fornecedor(fornecedor_input)
+            forn_resp = {"existe": False, "id_criado": id_fornecedor}
 
-    # --- FATURADO ---
-    res_fat = repository.buscar_faturado(faturado_input.get("cpf"))
-    if res_fat["existe"]:
-        id_faturado = res_fat["id"]
-        fat_resp = {"existe": True, "id": id_faturado}
-    else:
-        id_faturado = repository.criar_faturado(faturado_input)
-        fat_resp = {"existe": False, "id_criado": id_faturado}
+        # --- FATURADO ---
+        res_fat = repository.buscar_faturado(faturado_input.get("cpf"))
+        if res_fat["existe"]:
+            id_faturado = res_fat["id"]
+            fat_resp = {"existe": True, "id": id_faturado}
+        else:
+            id_faturado = repository.criar_faturado(faturado_input)
+            fat_resp = {"existe": False, "id_criado": id_faturado}
 
-    # --- DESPESA ---
-    descricao_despesa = despesa_input.get("descricao", "")
-    res_desp = repository.buscar_despesa(descricao_despesa)
-    if res_desp["existe"]:
-        id_classificacao = res_desp["id"]
-        desp_resp = {"existe": True, "id": id_classificacao}
-    else:
-        id_classificacao = repository.criar_despesa(descricao_despesa)
-        desp_resp = {"existe": False, "id_criado": id_classificacao}
+        # --- DESPESA ---
+        descricao_despesa = despesa_input.get("descricao", "")
+        res_desp = repository.buscar_despesa(descricao_despesa)
+        if res_desp["existe"]:
+            id_classificacao = res_desp["id"]
+            desp_resp = {"existe": True, "id": id_classificacao}
+        else:
+            id_classificacao = repository.criar_despesa(descricao_despesa)
+            desp_resp = {"existe": False, "id_criado": id_classificacao}
 
-    # --- MOVIMENTO ---
-    id_movimento = repository.criar_movimento({
-        "id_fornecedor":   id_fornecedor,
-        "id_faturado":     id_faturado,
-        "id_classificacao": id_classificacao,
-        "valor_total":     valor_total,
-        "data_emissao":    data_emissao,
-        "descricao_itens": descricao_itens,
-    })
-
-    # --- PARCELAS ---
-    ultimo_id_parcela = None
-    if parcelas:
-        for p in parcelas:
-            identificacao = f"MOV{id_movimento}-PARC{p.get('numero', 1)}"
-            ultimo_id_parcela = repository.criar_parcela(id_movimento, {
-                "identificacao":   identificacao,
-                "data_vencimento": p.get("data_vencimento") or data_emissao,
-                "valor":           p.get("valor", valor_total),
-            })
-    else:
-        ultimo_id_parcela = repository.criar_parcela(id_movimento, {
-            "identificacao":   f"MOV{id_movimento}-PARC1",
-            "data_vencimento": data_emissao,
-            "valor":           valor_total,
+        # --- MOVIMENTO ---
+        id_movimento = repository.criar_movimento({
+            "id_fornecedor":    id_fornecedor,
+            "id_faturado":      id_faturado,
+            "id_classificacao": id_classificacao,
+            "valor_total":      valor_total,
+            "data_emissao":     data_emissao,
+            "descricao_itens":  descricao_itens,
         })
 
-    # Invalida o índice vetorial para que o novo movimento seja indexado na próxima consulta
-    reset_vector_store()
+        # --- PARCELAS ---
+        ultimo_id_parcela = None
+        if parcelas:
+            for p in parcelas:
+                identificacao = f"MOV{id_movimento}-PARC{p.get('numero', 1)}"
+                ultimo_id_parcela = repository.criar_parcela(id_movimento, {
+                    "identificacao":   identificacao,
+                    "data_vencimento": p.get("data_vencimento") or data_emissao,
+                    "valor":           p.get("valor", valor_total),
+                })
+        else:
+            ultimo_id_parcela = repository.criar_parcela(id_movimento, {
+                "identificacao":   f"MOV{id_movimento}-PARC1",
+                "data_vencimento": data_emissao,
+                "valor":           valor_total,
+            })
+
+        # Invalida o índice vetorial para que o novo movimento seja indexado na próxima consulta
+        reset_vector_store()
+
+    except Exception as e:
+        return jsonify({"erro": f"Falha ao salvar dados no banco: {str(e)}"}), 500
 
     return jsonify({
-        "fornecedor":  forn_resp,
-        "faturado":    fat_resp,
-        "despesa":     desp_resp,
+        "fornecedor":   forn_resp,
+        "faturado":     fat_resp,
+        "despesa":      desp_resp,
         "movimento_id": id_movimento,
         "parcela_id":   ultimo_id_parcela,
-        "sucesso":     True,
+        "sucesso":      True,
     })
 
 
@@ -339,4 +368,4 @@ def rota_excluir_movimento(id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=8000)
+    app.run(debug=False, host="0.0.0.0", port=8000)
