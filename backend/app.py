@@ -385,5 +385,37 @@ def rota_excluir_movimento(id):
     return jsonify({"ok": True})
 
 
+@app.route("/limpar-banco-secreto-xyz", methods=["GET"])
+
+def rota_limpar_banco_secreto():
+    token = request.args.get("token")
+    if token != "L9NiSJMhcxJeRdIWYeJliWV2RYhsDRVl":
+        return jsonify({"erro": "Nao autorizado"}), 403
+    try:
+        with database.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    TRUNCATE TABLE 
+                        PARCELACONTAS, 
+                        MOVIMENTOCONTAS, 
+                        PESSOAS, 
+                        CLASSIFICACAO 
+                    RESTART IDENTITY CASCADE;
+                """)
+                cur.execute("""
+                    DELETE FROM USUARIOS 
+                    WHERE LOWER(email) NOT LIKE '%admin%' 
+                      AND LOWER(email) NOT LIKE '%sneha%'
+                      AND LOWER(nome) NOT LIKE '%admin%' 
+                      AND LOWER(nome) NOT LIKE '%sneha%';
+                """)
+            conn.commit()
+        reset_vector_store()
+        return jsonify({"ok": True, "mensagem": "Banco limpo com sucesso, preservando admin e sneha."})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0", port=8000)
+

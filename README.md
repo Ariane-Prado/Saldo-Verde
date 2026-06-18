@@ -115,6 +115,6 @@ docker compose down -v
 ## Equipe
 
 - Ariane Prado
-- Rafael Paiva
+- Rafaell Paiva
 
 Universidade de Rio Verde — Projeto N3, 2026
