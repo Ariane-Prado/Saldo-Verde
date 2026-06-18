@@ -100,13 +100,31 @@ def criar_despesa(descricao):
     return novo_id
 
 
+def buscar_movimento_por_nota(numero_nota_fiscal, cnpj_fornecedor):
+    """Verifica se já existe um movimento ativo com a mesma nota fiscal e fornecedor."""
+    if not numero_nota_fiscal or not cnpj_fornecedor:
+        return None
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT m.id FROM MOVIMENTOCONTAS m
+                JOIN PESSOAS forn ON forn.id = m.id_fornecedor
+                WHERE m.numero_nota_fiscal = %s AND forn.cpf_cnpj = %s AND m.ativo = TRUE
+                """,
+                (numero_nota_fiscal, cnpj_fornecedor)
+            )
+            row = cur.fetchone()
+    return row[0] if row else None
+
+
 def criar_movimento(dados):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO MOVIMENTOCONTAS (tipo, id_fornecedor, id_faturado, id_classificacao, valor_total, data_emissao, descricao_itens)
-                VALUES ('APAGAR', %s, %s, %s, %s, %s, %s)
+                INSERT INTO MOVIMENTOCONTAS (tipo, id_fornecedor, id_faturado, id_classificacao, valor_total, data_emissao, descricao_itens, numero_nota_fiscal)
+                VALUES ('APAGAR', %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
@@ -116,6 +134,7 @@ def criar_movimento(dados):
                     dados.get("valor_total"),
                     _normalizar_data(dados.get("data_emissao")),
                     dados.get("descricao_itens"),
+                    dados.get("numero_nota_fiscal"),
                 )
             )
             novo_id = _fetch_id(cur, "MOVIMENTOCONTAS")

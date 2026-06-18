@@ -62,12 +62,13 @@ def _mock_cursor_aggregate(partes: list[str]):
     cur.__exit__ = MagicMock(return_value=False)
     # fetchone para total geral
     cur.fetchone.return_value = (18500.00,)
-    # fetchall para por-fornecedor, por-classificação, top-5
+    # fetchall para por-fornecedor, por-classificação, top-5 maiores e top-5 menores
     cur.fetchall.side_effect = [
         [("AgroDefense Ltda", 15000.00, 1), ("MecAgro Serviços", 3500.00, 1)],
         [("INSUMOS AGRÍCOLAS", 15000.00, 1), ("MANUTENÇÃO E OPERAÇÃO", 3500.00, 1)],
         [(1, "AgroDefense Ltda", "INSUMOS AGRÍCOLAS", 15000.00, "2025-03-10"),
          (2, "MecAgro Serviços", "MANUTENÇÃO E OPERAÇÃO", 3500.00, "2025-01-15")],
+        [(2, "MecAgro Serviços", "MANUTENÇÃO E OPERAÇÃO", 3500.00, "2025-01-15")],
     ]
     conn = MagicMock()
     conn.cursor.return_value = cur
@@ -207,6 +208,8 @@ class TestPergunta2ParcelasCPF:
         cur.fetchall.side_effect = [
             [("Ana Paula Lima", "444.555.666-04", 3500.00, 1)],  # por faturado
             [("MANUTENÇÃO E OPERAÇÃO", 3500.00, 1)],              # por classificação
+            [(1, "Ana Paula Lima", "MANUTENÇÃO E OPERAÇÃO", 3500.00, "2025-02-15")],  # maiores
+            [(1, "Ana Paula Lima", "MANUTENÇÃO E OPERAÇÃO", 3500.00, "2025-02-15")],  # menores
         ]
         conn = MagicMock()
         conn.cursor.return_value = cur
@@ -222,7 +225,13 @@ class TestPergunta2ParcelasCPF:
 
     def test_buscar_ids_filtrados_com_cpf_e_ano(self):
         """Verifica que a query SQL de pré-filtro usa CPF e ano corretamente."""
-        ent = Entidades(ano=2025, documento="444.555.666-04")
+        from datetime import date
+        ent = Entidades(
+            ano=2025,
+            documento="444.555.666-04",
+            data_inicio=date(2025, 1, 1),
+            data_fim=date(2025, 12, 31),
+        )
 
         cur = MagicMock()
         cur.__enter__ = lambda s: s
@@ -238,11 +247,13 @@ class TestPergunta2ParcelasCPF:
 
         assert ids == {2}
         # Verifica que a query SQL foi chamada com os parâmetros corretos
+        from datetime import date
         chamada = cur.execute.call_args
         sql, params = chamada[0]
         assert "cpf_cnpj" in sql
-        assert "EXTRACT" in sql
-        assert 2025 in params
+        assert "BETWEEN" in sql
+        assert date(2025, 1, 1) in params
+        assert date(2025, 12, 31) in params
         assert "444.555.666-04" in params
 
 

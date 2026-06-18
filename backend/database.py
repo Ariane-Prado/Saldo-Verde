@@ -45,6 +45,7 @@ def init_db():
                     ativo             BOOLEAN NOT NULL DEFAULT TRUE
                 );
                 ALTER TABLE MOVIMENTOCONTAS ADD COLUMN IF NOT EXISTS descricao_itens TEXT;
+                ALTER TABLE MOVIMENTOCONTAS ADD COLUMN IF NOT EXISTS numero_nota_fiscal VARCHAR(50);
 
                 CREATE TABLE IF NOT EXISTS PARCELACONTAS (
                     id               SERIAL PRIMARY KEY,

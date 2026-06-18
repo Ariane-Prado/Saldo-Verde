@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manual de Utilização — Saldo Verde</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    /* ── Print ── */
+    @media print {
+      .no-print { display: none !important; }
+      .page-break { page-break-before: always; }
+      body { font-size: 10.5pt; }
+      .cover { page-break-after: always; }
+    }
+
+    @page {
+      margin: 2cm 2.2cm 2cm 2.5cm;
+    }
+
+    /* ── Cover ── */
+    .cover {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 60px 40px;
+      background: linear-gradient(160deg, #f0fdf4 0%, #dcfce7 60%, #bbf7d0 100%);
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background: #16a34a;
+      color: #fff;
+      font-size: 8pt;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 28px;
+    }
+
+    .cover h1 {
+      font-size: 42pt;
+      font-weight: 800;
+      color: #14532d;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+
+    .cover-subtitle {
+      font-size: 14pt;
+      color: #166534;
+      margin-bottom: 50px;
+      font-weight: 400;
+    }
+
+    .cover-divider {
+      width: 60px;
+      height: 4px;
+      background: #22c55e;
+      border-radius: 2px;
+      margin: 0 auto 40px;
+    }
+
+    .cover-meta {
+      font-size: 10pt;
+      color: #166534;
+      line-height: 2;
+    }
+
+    .cover-meta strong {
+      color: #14532d;
+    }
+
+    .cover-logo {
+      font-size: 58pt;
+      margin-bottom: 24px;
+      filter: drop-shadow(0 4px 12px rgba(34,197,94,0.3));
+    }
+
+    /* ── TOC ── */
+    .toc {
+      padding: 48px 0 32px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .toc h2 {
+      font-size: 18pt;
+      color: #14532d;
+      border-left: 5px solid #22c55e;
+      padding-left: 14px;
+      margin-bottom: 24px;
+    }
+
+    .toc ol {
+      list-style: none;
+      counter-reset: toc-counter;
+    }
+
+    .toc ol li {
+      counter-increment: toc-counter;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px dotted #d1fae5;
+      font-size: 11pt;
+    }
+
+    .toc ol li::before {
+      content: counter(toc-counter) ".";
+      color: #16a34a;
+      font-weight: 700;
+      min-width: 22px;
+    }
+
+    .toc ol li a {
+      color: #1a1a1a;
+      text-decoration: none;
+    }
+
+    .toc ol li .pg {
+      margin-left: auto;
+      color: #6b7280;
+      font-size: 9.5pt;
+    }
+
+    /* ── Content wrapper ── */
+    .content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ── Section ── */
+    .section {
+      padding: 40px 0 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .section-number {
+      background: #16a34a;
+      color: #fff;
+      font-size: 9pt;
+      font-weight: 800;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .section h2 {
+      font-size: 16pt;
+      color: #14532d;
+      font-weight: 700;
+    }
+
+    .section h3 {
+      font-size: 12pt;
+      color: #166534;
+      font-weight: 600;
+      margin: 22px 0 8px;
+      padding-left: 12px;
+      border-left: 3px solid #86efac;
+    }
+
+    .section p {
+      margin-bottom: 10px;
+      color: #374151;
+    }
+
+    .section ul, .section ol {
+      margin: 8px 0 12px 20px;
+      color: #374151;
+    }
+
+    .section li {
+      margin-bottom: 5px;
+    }
+
+    /* ── Divider ── */
+    .section-divider {
+      border: none;
+      border-top: 2px solid #f0fdf4;
+      margin: 8px 0;
+    }
+
+    /* ── Callout boxes ── */
+    .box {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 10.5pt;
+    }
+
+    .box-info {
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      color: #166534;
+    }
+
+    .box-warn {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+    }
+
+    .box-tip {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      color: #1e40af;
+    }
+
+    .box strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 9pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.8;
+    }
+
+    /* ── Step list ── */
+    .steps {
+      list-style: none;
+      counter-reset: step-counter;
+      margin: 12px 0 16px;
+    }
+
+    .steps li {
+      counter-increment: step-counter;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 9px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .steps li::before {
+      content: counter(step-counter);
+      background: #dcfce7;
+      color: #16a34a;
+      font-weight: 700;
+      font-size: 9.5pt;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 10pt;
+    }
+
+    thead {
+      background: #f0fdf4;
+    }
+
+    th {
+      text-align: left;
+      padding: 9px 12px;
+      color: #166534;
+      font-weight: 700;
+      font-size: 9.5pt;
+      border-bottom: 2px solid #86efac;
+    }
+
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #f3f4f6;
+      color: #374151;
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    /* ── Code / kbd ── */
+    code {
+      background: #f3f4f6;
+      color: #16a34a;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 9.5pt;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    kbd {
+      background: #1f2937;
+      color: #f9fafb;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 9pt;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    /* ── Credential box ── */
+    .credential-box {
+      background: #14532d;
+      color: #f0fdf4;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 16px 0;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .credential-box .cred-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .credential-box .cred-label {
+      font-size: 8.5pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.65;
+      margin-bottom: 3px;
+    }
+
+    .credential-box .cred-value {
+      font-size: 16pt;
+      font-weight: 700;
+      font-family: 'Consolas', monospace;
+      color: #86efac;
+    }
+
+    /* ── URL highlight ── */
+    .url-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-family: 'Consolas', monospace;
+      font-size: 11pt;
+      color: #16a34a;
+      margin: 12px 0;
+      word-break: break-all;
+    }
+
+    /* ── Feature card ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .feature-card {
+      border: 1px solid #d1fae5;
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #f9fffe;
+    }
+
+    .feature-card h4 {
+      color: #14532d;
+      font-size: 10.5pt;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .feature-card p {
+      font-size: 9.5pt;
+      color: #4b5563;
+      margin: 0;
+    }
+
+    /* ── Footer line ── */
+    .footer-line {
+      border-top: 2px solid #f0fdf4;
+      padding: 20px 0;
+      text-align: center;
+      font-size: 9pt;
+      color: #9ca3af;
+      margin-top: 40px;
+    }
+
+    /* ── Print button ── */
+    .print-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 11pt;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(22,163,74,0.35);
+      z-index: 999;
+    }
+
+    .print-btn:hover { background: #15803d; }
+  </style>
+</head>
+<body>
+
+<!-- Print button (hidden on print) -->
+<button class="print-btn no-print" onclick="window.print()">Salvar como PDF</button>
+
+<!-- ══════════════════════════════════════ CAPA ══════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">🌿</div>
+  <div class="cover-badge">Manual de Utilização</div>
+  <h1>Saldo Verde</h1>
+  <p class="cover-subtitle">Sistema de Gestão Financeira Agrícola com Inteligência Artificial</p>
+  <div class="cover-divider"></div>
+  <div class="cover-meta">
+    <p><strong>Versão:</strong> 1.0 — Junho de 2026</p>
+    <p><strong>Equipe:</strong> Ariane Prado &amp; Rafael Paiva</p>
+    <p><strong>Instituição:</strong> Universidade de Rio Verde — Projeto N3, 2026</p>
+    <p style="margin-top:16px"><strong>Acesso ao sistema:</strong> https://saldo-verde-rho.vercel.app</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ SUMÁRIO ══════════════════════════════════════ -->
+<div class="page-break"></div>
+<div class="content">
+  <div class="toc">
+    <h2>Sumário</h2>
+    <ol>
+      <li><a href="#sec1">Visão Geral do Sistema</a></li>
+      <li><a href="#sec2">Acesso ao Sistema — Login</a></li>
+      <li><a href="#sec3">Interface e Navegação</a></li>
+      <li><a href="#sec4">Módulo Pessoas</a></li>
+      <li><a href="#sec5">Módulo Classificação</a></li>
+      <li><a href="#sec6">Módulo Contas</a></li>
+      <li><a href="#sec7">Nota Fiscal com Inteligência Artificial</a></li>
+      <li><a href="#sec8">Consulta IA em Linguagem Natural</a></li>
+    </ol>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ SEÇÕES ══════════════════════════════════════ -->
+
+<!-- 1. Visão Geral -->
+<div class="page-break"></div>
+<div class="content">
+  <div class="section" id="sec1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <h2>Visão Geral do Sistema</h2>
+    </div>
+    <hr class="section-divider" />
+
+    <p>
+      O <strong>Saldo Verde</strong> é um sistema web de gestão financeira desenvolvido para o contexto do agronegócio. Ele permite o cadastro de pessoas (fornecedores, clientes e faturados), a classificação de despesas e receitas e o registro de contas a pagar e a receber com suporte a parcelamento.
+    </p>
+    <p>
+      Além do gerenciamento convencional, o sistema integra recursos de <strong>Inteligência Artificial</strong> que automatizam a extração de dados de notas fiscais em PDF e permitem consultas financeiras em linguagem natural.
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>Manter Pessoas</h4>
+        <p>Cadastre fornecedores, clientes e faturados com filtros, busca e ordenação por coluna.</p>
+      </div>
+      <div class="feature-card">
+        <h4>Manter Classificação</h4>
+        <p>Crie categorias personalizadas de despesa e receita para organizar as movimentações.</p>
+      </div>
+      <div class="feature-card">
+        <h4>Manter Contas</h4>
+        <p>Registre contas a pagar e a receber com múltiplas parcelas e datas de vencimento.</p>
+      </div>
+      <div class="feature-card">
+        <h4>Nota Fiscal IA</h4>
+        <p>Envie um PDF e a IA extrai fornecedor, valores e parcelas automaticamente.</p>
+      </div>
+      <div class="feature-card">
+        <h4>Consulta IA</h4>
+        <p>Perguntas em linguagem natural respondidas com base nos dados financeiros cadastrados.</p>
+      </div>
+      <div class="feature-card">
+        <h4>Tutorial Interativo</h4>
+        <p>Guia passo a passo integrado à interface, acessível a qualquer momento pelo menu lateral.</p>
+      </div>
+    </div>
+
+    <h3>Tecnologias utilizadas</h3>
+    <table>
+      <thead><tr><th>Camada</th><th>Tecnologia</th></tr></thead>
+      <tbody>
+        <tr><td>Frontend</td><td>React 19 + Vite</td></tr>
+        <tr><td>Backend</td><td>Python 3.13 / Flask</td></tr>
+        <tr><td>Banco de Dados</td><td>PostgreSQL 17</td></tr>
+        <tr><td>Inteligência Artificial</td><td>Google Gemini + FAISS (busca semântica)</td></tr>
+        <tr><td>Infraestrutura</td><td>Docker + Docker Compose</td></tr>
+        <tr><td>Hospedagem</td><td>Vercel (frontend) + Render (backend + banco)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2. Login -->
+  <div class="page-break"></div>
+  <div class="section" id="sec2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <h2>Acesso ao Sistema — Login</h2>
+    </div>
+    <hr class="section-divider" />
+
+    <p>O sistema está disponível publicamente no endereço abaixo. Não é necessário instalar nada para acessar a versão em produção.</p>
+
+    <div class="url-box">https://saldo-verde-rho.vercel.app</div>
+
+    <h3>Credenciais de acesso</h3>
+    <p>Utilize as credenciais fornecidas pelo responsável pelo sistema para entrar:</p>
+
+    <div class="credential-box">
+      <div class="cred-item">
+        <span class="cred-label">E-mail</span>
+        <span class="cred-value">admin@saldoverde.com</span>
+      </div>
+      <div class="cred-item">
+        <span class="cred-label">Senha</span>
+        <span class="cred-value">admin123</span>
+      </div>
+    </div>
+
+    <h3>Passos para entrar</h3>
+    <ol class="steps">
+      <li>Acesse o link acima no navegador (Chrome, Edge ou Firefox recomendados).</li>
+      <li>Digite seu e-mail e senha nos campos indicados.</li>
+      <li>Clique em <strong>Entrar</strong>.</li>
+      <li>O sistema abre e exibe automaticamente o <strong>tutorial interativo</strong>. Você pode seguir os passos ou clicar em "Pular tutorial" para ir diretamente ao sistema.</li>
+    </ol>
+
+    <div class="box box-info">
+      <strong>Observação</strong>
+      O backend é hospedado no Render com plano gratuito. Após longos períodos sem uso, o servidor pode entrar em modo de espera. Caso a tela demore a carregar, aguarde até 30 segundos — o serviço acorda automaticamente.
+    </div>
+  </div>
+
+  <!-- 3. Interface e Navegação -->
+  <div class="page-break"></div>
+  <div class="section" id="sec3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <h2>Interface e Navegação</h2>
+    </div>
+    <hr class="section-divider" />
+
+    <p>A interface é dividida em duas áreas principais:</p>
+
+    <table>
+      <thead><tr><th>Área</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Barra lateral (sidebar)</strong></td>
+          <td>Menu de navegação à esquerda com todos os módulos do sistema, nome do usuário logado e botão de saída.</td>
+        </tr>
+        <tr>
+          <td><strong>Área de conteúdo</strong></td>
+          <td>Painel central onde cada módulo é exibido ao ser selecionado no menu.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Menu lateral — seções</h3>
+    <table>
+      <thead><tr><th>Seção</th><th>Item</th><th>Função</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="2"><strong>IA</strong></td><td>Nota Fiscal</td><td>Upload de PDF para extração automática de dados</td></tr>
+        <tr><td>Consulta IA</td><td>Perguntas em linguagem natural sobre os dados</td></tr>
+        <tr><td rowspan="3"><strong>Cadastros</strong></td><td>Pessoas</td><td>Gerenciar fornecedores, clientes e faturados</td></tr>
+        <tr><td>Classificação</td><td>Gerenciar categorias de despesa e receita</td></tr>
+        <tr><td>Contas</td><td>Registrar movimentações financeiras</td></tr>
+        <tr><td><strong>Ajuda</strong></td><td>Tutorial</td><td>Abre o guia interativo do sistema</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Tutorial Interativo</h3>
+    <p>
+      Ao fazer login pela primeira vez, o tutorial abre automaticamente. Ele cobre todas as funcionalidades com 9 passos, destacando na tela o elemento sendo explicado. Para reabrir a qualquer momento, clique em <strong>Tutorial</strong> no menu lateral.
+    </p>
+
+    <div class="box box-tip">
+      <strong>Dica</strong>
+      Em todas as tabelas do sistema, clique no cabeçalho de qualquer coluna para ordenar os registros em ordem crescente ou decrescente.
+    </div>
+  </div>
+
+  <!-- 4. Pessoas -->
+  <div class="page-break"></div>
+  <div class="section" id="sec4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <h2>Módulo Pessoas</h2>
+    </div>
+    <hr class="section-divider" />
+
+    <p>
+      O módulo <strong>Pessoas</strong> permite cadastrar todos os participantes das movimentações financeiras. Existem três tipos de pessoa:
+    </p>
+
+    <table>
+      <thead><tr><th>Tipo</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Fornecedor</strong></td><td>Empresa ou pessoa que fornece produtos ou serviços à propriedade.</td></tr>
+        <tr><td><strong>Cliente</strong></td><td>Quem compra ou recebe os produtos da propriedade.</td></tr>
+        <tr><td><strong>Faturado</strong></td><td>Responsável pelo pagamento da nota fiscal (pode ser diferente do fornecedor).</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Como cadastrar uma pessoa</h3>
+    <ol class="steps">
+      <li>Clique em <strong>Pessoas</strong> no menu lateral.</li>
+      <li>Clique no botão <strong>+ Nova Pessoa</strong>.</li>
+      <li>Preencha o nome e selecione o tipo (Fornecedor, Cliente ou Faturado).</li>
+      <li>Clique em <strong>Salvar</strong>.</li>
+    </ol>
+
+    <h3>Buscar e filtrar</h3>
+    <ul>
+      <li>Use o campo de <strong>busca por texto</strong> para localizar pessoas pelo nome.</li>
+      <li>Use o <strong>filtro por tipo</strong> para exibir apenas Fornecedores, Clientes ou Faturados.</li>
+      <li>Selecione <strong>Todos</strong> no filtro para ver todos os cadastros ativos.</li>
+    </ul>
+
+    <h3>Editar e excluir</h3>
+    <ul>
+      <li>Clique no ícone de <strong>edição (lápis)</strong> na linha desejada para alterar os dados.</li>
+      <li>Clique no ícone de <strong>exclusão (lixeira)</strong> para remover o registro.</li>
+    </ul>
+
+    <div class="box box-warn">
+      <strong>Atenção</strong>
+      Não é possível excluir uma pessoa que esteja vinculada a contas cadastradas. Remova ou transfira as contas vinculadas antes de excluir.
+    </div>
+  </div>
+
+  <!-- 5. Classificação -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <h2>Módulo Classificação</h2>
+    </div>
+    <hr class="section-divider" />
+
+    <p>
+      O módulo <strong>Classificação</strong> permite criar categorias para organizar as movimentações financeiras. Cada classificação pertence a um dos dois tipos:
+    </p>
+
+    <table>
+      <thead><tr><th>Tipo</th><th>Exemplos</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Despesa</strong></td><td>Insumos Agrícolas, Combustível, Mão de Obra, Manutenção</td></tr>
+        <tr><td><strong>Receita</strong></td><td>Venda de Grãos, Aluguel de Máquinas, Prestação de Serviços</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Como cadastrar uma classificação</h3>
+    <ol class="steps">
+      <li>Clique em <strong>Classificação</strong> no menu lateral.</li>
+      <li>Clique em <strong>+ Nova Classificação</strong>.</li>
+      <li>Digite o nome da categoria e selecione o tipo (Despesa ou Receita).</li>
+      <li>Clique em <strong>Salvar</strong>.</li>
+    </ol>
+
+    <div class="box box-info">
+      <strong>Observação</strong>
+      O sistema já vem com classificações pré-cadastradas como exemplo. Você pode editá-las, excluí-las ou criar novas conforme a necessidade.
+    </div>
+  </div>
+
+  <!-- 6. Contas -->
+  <div class="page-break"></div>
+  <div class="section" id="sec6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <h2>Módulo Contas</h2>
+    </div>
+    <hr class="section-divider" />
+
+    <p>
+      O módulo <strong>Contas</strong> é o núcleo financeiro do sistema. Aqui são registradas todas as movimentações, divididas em dois tipos:
+    </p>
+
+    <table>
+      <thead><tr><th>Tipo</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A Pagar</strong></td><td>Despesas e pagamentos a fornecedores.</td></tr>
+        <tr><td><strong>A Receber</strong></td><td>Receitas e cobranças de clientes.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Como registrar uma conta</h3>
+    <ol class="steps">
+      <li>Clique em <strong>Contas</strong> no menu lateral.</li>
+      <li>Clique em <strong>+ Nova Conta</strong>.</li>
+      <li>Preencha os campos: descrição, tipo (A Pagar / A Receber), valor total, pessoa vinculada e classificação.</li>
+      <li>Defina o número de parcelas e as datas de vencimento de cada parcela.</li>
+      <li>Clique em <strong>Salvar</strong>.</li>
+    </ol>
+
+    <h3>Visualizar detalhes e parcelas</h3>
+    <p>
+      Clique em qualquer linha da tabela de contas para abrir o painel de detalhes, que exibe todas as parcelas, datas de vencimento e o status de cada uma.
+    </p>
+
+    <h3>Buscar e filtrar</h3>
+    <ul>
+      <li>Use o campo de busca para localizar contas por descrição ou pessoa.</li>
+      <li>Filtre por <strong>A Pagar</strong> ou <strong>A Receber</strong> usando o seletor de tipo.</li>
+      <li>Ordene as colunas clicando nos cabeçalhos da tabela.</li>
+    </ul>
+
+    <div class="box box-tip">
+      <strong>Dica</strong>
+      Contas geradas automaticamente pelo módulo de Nota Fiscal IA já aparecem aqui preenchidas com os dados extraídos do PDF, prontas para revisão e ajuste.
+    </div>
+  </div>
+
+  <!-- 7. Nota Fiscal IA -->
+  <div class="page-break"></div>
+  <div class="section" id="sec7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <h2>Nota Fiscal com Inteligência Artificial</h2>
+    </div>
+    <hr class="section-divider" />
+
+    <p>
+      O módulo <strong>Nota Fiscal</strong> utiliza o Google Gemini para analisar arquivos PDF de notas fiscais e extrair automaticamente os dados relevantes, eliminando a necessidade de digitação manual.
+    </p>
+
+    <h3>Como usar</h3>
+    <ol class="steps">
+      <li>Clique em <strong>Nota Fiscal</strong> no menu lateral.</li>
+      <li>Selecione um arquivo PDF da nota fiscal.</li>
+      <li>Clique em <strong>Extrair Dados</strong> e aguarde o processamento (pode levar alguns segundos).</li>
+      <li>Revise os dados extraídos: fornecedor, valores, número de parcelas e datas de vencimento.</li>
+      <li>Os dados são salvos automaticamente no banco após a extração.</li>
+    </ol>
+
+    <h3>Dados extraídos automaticamente</h3>
+    <table>
+      <thead><tr><th>Campo</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td>Fornecedor</td><td>Nome do emitente da nota fiscal</td></tr>
+        <tr><td>Valor total</td><td>Valor total da nota</td></tr>
+        <tr><td>Número de parcelas</td><td>Quantidade de parcelas identificadas</td></tr>
+        <tr><td>Datas de vencimento</td><td>Vencimento de cada parcela</td></tr>
+        <tr><td>Descrição</td><td>Produto ou serviço descrito na nota</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box box-info">
+      <strong>Observação</strong>
+      Os dados extraídos são uma sugestão da IA e podem ser editados antes de salvar. Sempre revise as informações antes de confirmar o registro.
+    </div>
+  </div>
+
+  <!-- 8. Consulta IA -->
+  <div class="page-break"></div>
+  <div class="section" id="sec8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <h2>Consulta IA em Linguagem Natural</h2>
+    </div>
+    <hr class="section-divider" />
+
+    <p>
+      O módulo <strong>Consulta IA</strong> permite fazer perguntas sobre os dados financeiros cadastrados usando linguagem natural, sem necessidade de conhecimento técnico ou SQL.
+    </p>
+
+    <h3>Como usar</h3>
+    <ol class="steps">
+      <li>Clique em <strong>Consulta IA</strong> no menu lateral.</li>
+      <li>Digite sua pergunta no campo de texto.</li>
+      <li>Selecione o modo de busca desejado.</li>
+      <li>Clique em <strong>Enviar</strong> e aguarde a resposta.</li>
+    </ol>
+
+    <h3>Modos de busca disponíveis</h3>
+    <table>
+      <thead><tr><th>Modo</th><th>Quando usar</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Modo Rápido</strong></td>
+          <td>Perguntas sobre movimentações recentes.</td>
+        </tr>
+        <tr>
+          <td><strong>Modo Completo</strong></td>
+          <td>Perguntas analíticas sobre períodos maiores ou por categoria.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Exemplos de perguntas</h3>
+    <ul>
+      <li>"Qual o total gasto com insumos agrícolas?"</li>
+      <li>"Quais fornecedores têm mais movimentações este ano?"</li>
+      <li>"Liste as contas a receber em aberto."</li>
+      <li>"Qual foi o maior pagamento registrado?"</li>
+      <li>"Mostre um resumo das despesas por categoria."</li>
+    </ul>
+
+    <div class="box box-tip">
+      <strong>Dica</strong>
+      Para consultas sobre um grande volume de dados, prefira o <strong>Modo Completo</strong>, pois ele realiza busca em toda a base e retorna resultados mais precisos.
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-line">
+    Saldo Verde — Manual de Utilização v1.0 &nbsp;|&nbsp; Universidade de Rio Verde, 2026 &nbsp;|&nbsp; Ariane Prado &amp; Rafael Paiva
+  </div>
+</div>
+
+</body>
+</html>

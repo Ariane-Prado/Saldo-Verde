@@ -1608,3 +1608,56 @@ body {
   .tutorial-corpo { padding: 20px 20px 16px; min-height: auto; }
   .tutorial-rodape { padding: 12px 20px 20px; }
 }
+
+/* ============================================
+   Tabelas e Estilização da Resposta da IA (RAG)
+   ============================================ */
+
+.tabela-container {
+  width: 100%;
+  overflow-x: auto;
+  margin: 16px 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: white;
+}
+
+.tabela-resposta {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+}
+
+.tabela-resposta th,
+.tabela-resposta td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tabela-resposta th {
+  background: #f9fafb;
+  color: #4b5563;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tabela-resposta td {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.tabela-resposta tr:last-child td {
+  border-bottom: none;
+}
+
+.resposta-paragrafo {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+.resposta-espacamento {
+  height: 10px;
+}

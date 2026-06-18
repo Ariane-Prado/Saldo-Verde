@@ -83,13 +83,22 @@ def extrair():
 def analisar():
     body = request.get_json(force=True)
 
-    fornecedor_input  = body.get("fornecedor", {})
-    faturado_input    = body.get("faturado", {})
-    despesa_input     = body.get("despesa", {})
-    valor_total       = body.get("valor_total", 0)
-    data_emissao      = body.get("data_emissao")
-    parcelas          = body.get("parcelas", [])
-    descricao_itens   = body.get("descricao_itens", "")
+    fornecedor_input    = body.get("fornecedor", {})
+    faturado_input      = body.get("faturado", {})
+    despesa_input       = body.get("despesa", {})
+    valor_total         = body.get("valor_total", 0)
+    data_emissao        = body.get("data_emissao")
+    parcelas            = body.get("parcelas", [])
+    descricao_itens     = body.get("descricao_itens", "")
+    numero_nota_fiscal  = (body.get("numero_nota_fiscal") or "").strip()
+
+    duplicado_id = repository.buscar_movimento_por_nota(numero_nota_fiscal, fornecedor_input.get("cnpj"))
+    if duplicado_id:
+        return jsonify({
+            "erro": f"Esta nota fiscal (Nº {numero_nota_fiscal}) já está cadastrada — Movimento #{duplicado_id}.",
+            "duplicada": True,
+            "movimento_id": duplicado_id,
+        }), 409
 
     try:
         # --- FORNECEDOR ---
@@ -122,12 +131,13 @@ def analisar():
 
         # --- MOVIMENTO ---
         id_movimento = repository.criar_movimento({
-            "id_fornecedor":    id_fornecedor,
-            "id_faturado":      id_faturado,
-            "id_classificacao": id_classificacao,
-            "valor_total":      valor_total,
-            "data_emissao":     data_emissao,
-            "descricao_itens":  descricao_itens,
+            "id_fornecedor":      id_fornecedor,
+            "id_faturado":        id_faturado,
+            "id_classificacao":   id_classificacao,
+            "valor_total":        valor_total,
+            "data_emissao":       data_emissao,
+            "descricao_itens":    descricao_itens,
+            "numero_nota_fiscal": numero_nota_fiscal or None,
         })
 
         # --- PARCELAS ---
