@@ -450,3 +450,37 @@ def desativar_movimento(id):
             cur.execute("UPDATE PARCELACONTAS SET ativo=FALSE WHERE id_movimento=%s", (id,))
         conn.commit()
     return atualizado
+
+
+def obter_resumo_dashboard():
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT 
+                    COALESCE(SUM(CASE WHEN tipo = 'ARECEBER' THEN valor_total ELSE 0 END)::NUMERIC, 0) AS receitas,
+                    COALESCE(SUM(CASE WHEN tipo = 'APAGAR' THEN valor_total ELSE 0 END)::NUMERIC, 0) AS despesas,
+                    COUNT(*) AS total_contas
+                FROM MOVIMENTOCONTAS
+                WHERE ativo = TRUE
+            """)
+            row = cur.fetchone()
+            receitas = float(row[0]) if row else 0.0
+            despesas = float(row[1]) if row else 0.0
+            total_contas = int(row[2]) if row else 0
+            saldo = receitas - despesas
+            
+            cur.execute("SELECT COUNT(*) FROM PESSOAS WHERE ativo = TRUE")
+            total_pessoas = int(cur.fetchone()[0])
+            
+            cur.execute("SELECT COUNT(*) FROM CLASSIFICACAO WHERE ativo = TRUE")
+            total_classificacoes = int(cur.fetchone()[0])
+
+            return {
+                "receitas": receitas,
+                "despesas": despesas,
+                "saldo": saldo,
+                "total_contas": total_contas,
+                "total_pessoas": total_pessoas,
+                "total_classificacoes": total_classificacoes
+            }
+

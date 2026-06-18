@@ -1661,3 +1661,151 @@ body {
 .resposta-espacamento {
   height: 10px;
 }
+
+/* ============================================
+   Dashboard — Painel de Controle
+   ============================================ */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+}
+
+.dashboard-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+}
+
+.dashboard-valor {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 12px 0 6px;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.valor-receita {
+  color: #16a34a;
+}
+
+.valor-despesa {
+  color: #dc2626;
+}
+
+.saldo-positivo .dashboard-valor {
+  color: #16a34a;
+}
+
+.saldo-negativo .dashboard-valor {
+  color: #dc2626;
+}
+
+.dashboard-detalhe {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.dashboard-card-mini {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.dashboard-mini-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.dashboard-card-mini h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dashboard-acoes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .dashboard-acoes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.botao-acao {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.botao-acao:hover {
+  background: #f0fdf4;
+  border-color: #86efac;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.08);
+}
+
+.icone-acao {
+  font-size: 28px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.045);
+}
+
+.texto-acao {
+  display: flex;
+  flex-direction: column;
+}
+
+.texto-acao strong {
+  font-size: 15px;
+  color: #111827;
+}
+
+.texto-acao span {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}

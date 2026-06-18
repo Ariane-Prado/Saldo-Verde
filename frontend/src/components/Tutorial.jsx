@@ -75,10 +75,10 @@ const PASSOS = [
     titulo: 'Consulta IA',
     descricao: 'Faça perguntas em linguagem natural sobre seus dados financeiros e receba respostas inteligentes:',
     lista: [
-      'Modo Rápido — analisa os registros mais recentes',
-      'Modo Completo — busca inteligente em toda a base de dados',
+      'RAG Simples — ideal para contas, somas e relatórios precisos',
+      'RAG Embeddings — busca inteligente pelo assunto ou significado das palavras',
     ],
-    dica: 'Exemplo: "Qual o total gasto com insumos?" ou "Quais fornecedores têm mais movimentações?"',
+    dica: 'Exemplo: "Qual o total gasto com insumos?" ou "O que foi comprado para controle de pragas?"',
     alvo: '[data-tutorial="nav-consulta"]',
   },
   {

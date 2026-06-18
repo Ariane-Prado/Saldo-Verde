@@ -211,6 +211,14 @@ def consultar():
         return jsonify({"erro": str(e)}), 500
 
 
+@app.route("/dashboard/resumo", methods=["GET"])
+def rota_dashboard_resumo():
+    try:
+        return jsonify(repository.obter_resumo_dashboard())
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+
 # ─────────────────────────────────────────────────────────────
 # CRUD — Pessoas
 # ─────────────────────────────────────────────────────────────

@@ -73,7 +73,7 @@ Em **Manter Contas**, clique em qualquer linha da tabela para ver o detalhe comp
 | Tela | Para que serve |
 |---|---|
 | **Nota Fiscal** | Envie um PDF e a IA extrai automaticamente os dados (fornecedor, valores, parcelas) |
-| **Consulta IA** | Faça perguntas em linguagem natural sobre seus dados financeiros |
+| **Consulta IA** | Faça perguntas em linguagem natural sobre seus dados financeiros. Possui dois modos de busca:<br/>• **RAG Simples (SQL-First)**: Recomendado para agregações (somas, totais) e filtros estruturados; roda SQL diretamente no banco de dados para precisão matemática absoluta.<br/>• **RAG Embeddings (Semântico)**: Recomendado para busca qualitativa; faz busca por similaridade e sinônimos via indexador vetorial FAISS. |
 
 ---
 

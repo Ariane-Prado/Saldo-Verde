@@ -428,6 +428,32 @@
     }
 
     .print-btn:hover { background: #15803d; }
+
+    /* ── Screenshots ── */
+    .screenshot-box {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 6px;
+      background: #f8fafc;
+      margin: 20px 0;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+    }
+
+    .screenshot-box img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+      display: block;
+      border: 1px solid #f1f5f9;
+    }
+
+    .screenshot-caption {
+      text-align: center;
+      font-size: 9pt;
+      color: #64748b;
+      margin-top: 8px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -459,11 +485,12 @@
       <li><a href="#sec1">Visão Geral do Sistema</a></li>
       <li><a href="#sec2">Acesso ao Sistema — Login</a></li>
       <li><a href="#sec3">Interface e Navegação</a></li>
-      <li><a href="#sec4">Módulo Pessoas</a></li>
-      <li><a href="#sec5">Módulo Classificação</a></li>
-      <li><a href="#sec6">Módulo Contas</a></li>
-      <li><a href="#sec7">Nota Fiscal com Inteligência Artificial</a></li>
-      <li><a href="#sec8">Consulta IA em Linguagem Natural</a></li>
+      <li><a href="#sec_dash">Painel de Controle — Dashboard</a></li>
+      <li><a href="#sec5">Módulo Pessoas</a></li>
+      <li><a href="#sec6">Módulo Classificação</a></li>
+      <li><a href="#sec7">Módulo Contas</a></li>
+      <li><a href="#sec8">Nota Fiscal com Inteligência Artificial</a></li>
+      <li><a href="#sec9">Consulta IA em Linguagem Natural</a></li>
     </ol>
   </div>
 </div>
@@ -563,6 +590,11 @@
       <li>O sistema abre e exibe automaticamente o <strong>tutorial interativo</strong>. Você pode seguir os passos ou clicar em "Pular tutorial" para ir diretamente ao sistema.</li>
     </ol>
 
+    <div class="screenshot-box">
+      <img src="manual_images/login.png" alt="Tela de Login do Saldo Verde" />
+      <div class="screenshot-caption">Figura 1: Tela de Login do Saldo Verde</div>
+    </div>
+
     <div class="box box-info">
       <strong>Observação</strong>
       O backend é hospedado no Render com plano gratuito. Após longos períodos sem uso, o servidor pode entrar em modo de espera. Caso a tela demore a carregar, aguarde até 30 segundos — o serviço acorda automaticamente.
@@ -598,6 +630,7 @@
     <table>
       <thead><tr><th>Seção</th><th>Item</th><th>Função</th></tr></thead>
       <tbody>
+        <tr><td><strong>Início</strong></td><td>Painel</td><td>Resumo financeiro e atalhos de ações rápidas</td></tr>
         <tr><td rowspan="2"><strong>IA</strong></td><td>Nota Fiscal</td><td>Upload de PDF para extração automática de dados</td></tr>
         <tr><td>Consulta IA</td><td>Perguntas em linguagem natural sobre os dados</td></tr>
         <tr><td rowspan="3"><strong>Cadastros</strong></td><td>Pessoas</td><td>Gerenciar fornecedores, clientes e faturados</td></tr>
@@ -618,11 +651,48 @@
     </div>
   </div>
 
-  <!-- 4. Pessoas -->
+  <!-- 4. Painel de Controle - Dashboard -->
   <div class="page-break"></div>
-  <div class="section" id="sec4">
+  <div class="section" id="sec_dash">
     <div class="section-header">
       <div class="section-number">4</div>
+      <h2>Painel de Controle — Dashboard</h2>
+    </div>
+    <hr class="section-divider" />
+
+    <p>
+      O <strong>Painel de Controle</strong> é a tela inicial do sistema após o login. Ele consolida os principais indicadores financeiros da fazenda e fornece atalhos de ações rápidas para otimizar as tarefas diárias.
+    </p>
+
+    <h3>Indicadores Principais</h3>
+    <ul>
+      <li><strong>Total a Receber:</strong> Soma de todas as receitas ativas registradas no sistema.</li>
+      <li><strong>Total a Pagar:</strong> Soma de todas as despesas ativas registradas no sistema.</li>
+      <li><strong>Saldo Líquido:</strong> O resultado financeiro acumulado (Total a Receber menos o Total a Pagar).</li>
+    </ul>
+
+    <div class="screenshot-box">
+      <img src="manual_images/dashboard.png" alt="Painel de Controle do Saldo Verde" />
+      <div class="screenshot-caption">Figura 2: Indicadores financeiros e atalhos rápidos do painel de controle</div>
+    </div>
+
+    <h3>Ações Rápidas (Atalhos)</h3>
+    <p>
+      Para facilitar a navegação, o painel inclui atalhos diretos:
+    </p>
+    <ul>
+      <li><strong>Registrar Conta:</strong> Abre o módulo de Contas para cadastros.</li>
+      <li><strong>Importar Nota Fiscal:</strong> Direciona para o leitor de PDF com Inteligência Artificial.</li>
+      <li><strong>Consultar com IA:</strong> Direciona para a barra de perguntas.</li>
+      <li><strong>Nova Pessoa:</strong> Atalho para a tela de fornecedores e clientes.</li>
+    </ul>
+  </div>
+
+  <!-- 5. Pessoas -->
+  <div class="page-break"></div>
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-number">5</div>
       <h2>Módulo Pessoas</h2>
     </div>
     <hr class="section-divider" />
@@ -648,6 +718,11 @@
       <li>Clique em <strong>Salvar</strong>.</li>
     </ol>
 
+    <div class="screenshot-box">
+      <img src="manual_images/pessoas.png" alt="Tela do Módulo Pessoas" />
+      <div class="screenshot-caption">Figura 3: Gerenciamento de fornecedores, clientes e faturados</div>
+    </div>
+
     <h3>Buscar e filtrar</h3>
     <ul>
       <li>Use o campo de <strong>busca por texto</strong> para localizar pessoas pelo nome.</li>
@@ -667,10 +742,10 @@
     </div>
   </div>
 
-  <!-- 5. Classificação -->
-  <div class="section" id="sec5">
+  <!-- 6. Classificação -->
+  <div class="section" id="sec6">
     <div class="section-header">
-      <div class="section-number">5</div>
+      <div class="section-number">6</div>
       <h2>Módulo Classificação</h2>
     </div>
     <hr class="section-divider" />
@@ -695,17 +770,22 @@
       <li>Clique em <strong>Salvar</strong>.</li>
     </ol>
 
+    <div class="screenshot-box">
+      <img src="manual_images/classificacoes.png" alt="Tela do Módulo Classificação" />
+      <div class="screenshot-caption">Figura 4: Cadastro de categorias de despesa e receita</div>
+    </div>
+
     <div class="box box-info">
       <strong>Observação</strong>
       O sistema já vem com classificações pré-cadastradas como exemplo. Você pode editá-las, excluí-las ou criar novas conforme a necessidade.
     </div>
   </div>
 
-  <!-- 6. Contas -->
+  <!-- 7. Contas -->
   <div class="page-break"></div>
-  <div class="section" id="sec6">
+  <div class="section" id="sec7">
     <div class="section-header">
-      <div class="section-number">6</div>
+      <div class="section-number">7</div>
       <h2>Módulo Contas</h2>
     </div>
     <hr class="section-divider" />
@@ -731,6 +811,11 @@
       <li>Clique em <strong>Salvar</strong>.</li>
     </ol>
 
+    <div class="screenshot-box">
+      <img src="manual_images/contas.png" alt="Tela do Módulo Contas" />
+      <div class="screenshot-caption">Figura 5: Gerenciamento de contas a pagar e a receber</div>
+    </div>
+
     <h3>Visualizar detalhes e parcelas</h3>
     <p>
       Clique em qualquer linha da tabela de contas para abrir o painel de detalhes, que exibe todas as parcelas, datas de vencimento e o status de cada uma.
@@ -749,11 +834,11 @@
     </div>
   </div>
 
-  <!-- 7. Nota Fiscal IA -->
+  <!-- 8. Nota Fiscal IA -->
   <div class="page-break"></div>
-  <div class="section" id="sec7">
+  <div class="section" id="sec8">
     <div class="section-header">
-      <div class="section-number">7</div>
+      <div class="section-number">8</div>
       <h2>Nota Fiscal com Inteligência Artificial</h2>
     </div>
     <hr class="section-divider" />
@@ -770,6 +855,11 @@
       <li>Revise os dados extraídos: fornecedor, valores, número de parcelas e datas de vencimento.</li>
       <li>Os dados são salvos automaticamente no banco após a extração.</li>
     </ol>
+
+    <div class="screenshot-box">
+      <img src="manual_images/nota_fiscal.png" alt="Tela do Módulo Nota Fiscal IA" />
+      <div class="screenshot-caption">Figura 6: Extração automática de dados de Notas Fiscais em PDF</div>
+    </div>
 
     <h3>Dados extraídos automaticamente</h3>
     <table>
@@ -789,11 +879,11 @@
     </div>
   </div>
 
-  <!-- 8. Consulta IA -->
+  <!-- 9. Consulta IA -->
   <div class="page-break"></div>
-  <div class="section" id="sec8">
+  <div class="section" id="sec9">
     <div class="section-header">
-      <div class="section-number">8</div>
+      <div class="section-number">9</div>
       <h2>Consulta IA em Linguagem Natural</h2>
     </div>
     <hr class="section-divider" />
@@ -806,37 +896,48 @@
     <ol class="steps">
       <li>Clique em <strong>Consulta IA</strong> no menu lateral.</li>
       <li>Digite sua pergunta no campo de texto.</li>
-      <li>Selecione o modo de busca desejado.</li>
-      <li>Clique em <strong>Enviar</strong> e aguarde a resposta.</li>
+      <li>Selecione o modo de busca desejado clicando em uma das abas: <strong>RAG Simples</strong> ou <strong>RAG Embeddings</strong>.</li>
+      <li>Clique em <strong>Consultar</strong> (ou use o atalho <kbd>Ctrl</kbd> + <kbd>Enter</kbd>) e aguarde a resposta gerada pela inteligência artificial.</li>
     </ol>
+
+    <div class="screenshot-box">
+      <img src="manual_images/consulta_ia.png" alt="Tela do Módulo Consulta IA" />
+      <div class="screenshot-caption">Figura 7: Painel de perguntas e respostas com abas de busca</div>
+    </div>
 
     <h3>Modos de busca disponíveis</h3>
     <table>
-      <thead><tr><th>Modo</th><th>Quando usar</th></tr></thead>
+      <thead><tr><th>Modo</th><th>Quando usar e Como funciona</th></tr></thead>
       <tbody>
         <tr>
-          <td><strong>Modo Rápido</strong></td>
-          <td>Perguntas sobre movimentações recentes.</td>
+          <td><strong>RAG Simples</strong></td>
+          <td>
+            <strong>Cálculos e Relatórios Financeiros:</strong> Recomendado para perguntas sobre somas, médias, totais de despesas ou receitas, e listagens organizadas por valores ou datas (ex: somas de gastos, maiores contas, datas de vencimento).<br/>
+            Neste modo, o sistema realiza os cálculos matemáticos exatos no banco de dados e os entrega prontos para o assistente. Isso garante que os valores apresentados na resposta sejam 100% corretos e livres de erros de soma.
+          </td>
         </tr>
         <tr>
-          <td><strong>Modo Completo</strong></td>
-          <td>Perguntas analíticas sobre períodos maiores ou por categoria.</td>
+          <td><strong>RAG Embeddings</strong></td>
+          <td>
+            <strong>Busca por Assunto ou Significado:</strong> Recomendado para perguntas abertas ou qualitativas, especialmente quando você deseja encontrar uma informação mas não se lembra do nome exato do produto ou fornecedor (ex: "o que comprei para combater pragas?").<br/>
+            Neste modo, o assistente inteligente varre todo o seu histórico financeiro procurando registros que tenham relação com o significado das palavras da sua pergunta (mesmo usando sinônimos) e resume o resultado para você.
+          </td>
         </tr>
       </tbody>
     </table>
 
     <h3>Exemplos de perguntas</h3>
     <ul>
-      <li>"Qual o total gasto com insumos agrícolas?"</li>
-      <li>"Quais fornecedores têm mais movimentações este ano?"</li>
-      <li>"Liste as contas a receber em aberto."</li>
-      <li>"Qual foi o maior pagamento registrado?"</li>
-      <li>"Mostre um resumo das despesas por categoria."</li>
+      <li>"Qual o total gasto com insumos agrícolas em 2024?" (Recomendado usar a aba <strong>RAG Simples</strong>)</li>
+      <li>"Quais fornecedores têm mais movimentações este ano?" (Recomendado usar a aba <strong>RAG Simples</strong>)</li>
+      <li>"Quais contas a pagar estão vencendo este mês?" (Recomendado usar a aba <strong>RAG Simples</strong>)</li>
+      <li>"O que eu comprei relacionado a controle de pragas?" (Recomendado usar a aba <strong>RAG Embeddings</strong>)</li>
+      <li>"Qual foi a despesa com defensivos agrícolas mais parecida com defensivos de soja?" (Recomendado usar a aba <strong>RAG Embeddings</strong>)</li>
     </ul>
 
     <div class="box box-tip">
-      <strong>Dica</strong>
-      Para consultas sobre um grande volume de dados, prefira o <strong>Modo Completo</strong>, pois ele realiza busca em toda a base e retorna resultados mais precisos.
+      <strong>Dica Prática</strong>
+      Se a sua dúvida envolve somar valores ou listar faturamentos, use sempre a aba <strong>RAG Simples</strong> para garantir exatidão nos cálculos. Se você deseja pesquisar itens pelo que eles significam (por exemplo, descobrir que 'herbicida' é um tipo de 'defensivo'), selecione a aba <strong>RAG Embeddings</strong>.
     </div>
   </div>
 

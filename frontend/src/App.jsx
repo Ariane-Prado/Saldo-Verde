@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import Login from './components/Login'
 import Tutorial from './components/Tutorial'
+import Dashboard from './components/Dashboard'
 import UploadNota from './components/UploadNota'
 import ConsultaRAG from './components/ConsultaRAG'
 import ChaveAPIModal from './components/ChaveAPIModal'
@@ -14,6 +15,7 @@ const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 const PAGINAS_IA = ['upload', 'consulta']
 
 const ITENS_NAV = [
+  { id: 'dashboard',     rotulo: 'Painel',        secao: 'Início' },
   { id: 'upload',        rotulo: 'Nota Fiscal',   secao: 'IA' },
   { id: 'consulta',      rotulo: 'Consulta IA',   secao: 'IA' },
   { id: 'pessoas',       rotulo: 'Pessoas',        secao: 'Cadastros' },
@@ -36,7 +38,7 @@ function IconeChave({ ativo }) {
 function App() {
   const [usuarioLogado, setUsuarioLogado]   = useState(() => localStorage.getItem('sv_usuario'))
   const [chaveOk, setChaveOk]               = useState(false)
-  const [pagina, setPagina]                 = useState('pessoas')
+  const [pagina, setPagina]                 = useState('dashboard')
   const [modalChave, setModalChave]         = useState(false)
   const [paginaPendente, setPaginaPendente] = useState(null)
   const [tutorialAberto, setTutorialAberto] = useState(false)
@@ -79,7 +81,7 @@ function App() {
     localStorage.removeItem('sv_usuario')
     setUsuarioLogado(null)
     setChaveOk(false)
-    setPagina('pessoas')
+    setPagina('dashboard')
     setTutorialAberto(false)
   }
 
@@ -132,6 +134,7 @@ function App() {
       </aside>
 
       <main className="conteudo-principal">
+        {pagina === 'dashboard'     && <Dashboard navegar={navegar} />}
         {pagina === 'upload'        && <UploadNota />}
         {pagina === 'consulta'      && <ConsultaRAG />}
         {pagina === 'pessoas'       && <ManterPessoas />}
