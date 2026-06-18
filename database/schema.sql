@@ -21,14 +21,16 @@ CREATE TABLE IF NOT EXISTS CLASSIFICACAO (
 
 -- MOVIMENTOCONTAS: Registros de contas a pagar / a receber
 CREATE TABLE IF NOT EXISTS MOVIMENTOCONTAS (
-    id               SERIAL PRIMARY KEY,
-    tipo             VARCHAR(10) NOT NULL CHECK (tipo IN ('APAGAR', 'ARECEBER')),
-    id_fornecedor    INT REFERENCES PESSOAS(id),
-    id_faturado      INT REFERENCES PESSOAS(id),
-    id_classificacao INT REFERENCES CLASSIFICACAO(id),
-    valor_total      DECIMAL(15, 2) NOT NULL,
-    data_emissao     DATE,
-    ativo            BOOLEAN NOT NULL DEFAULT TRUE
+    id                 SERIAL PRIMARY KEY,
+    tipo               VARCHAR(10) NOT NULL CHECK (tipo IN ('APAGAR', 'ARECEBER')),
+    id_fornecedor      INT REFERENCES PESSOAS(id),
+    id_faturado        INT REFERENCES PESSOAS(id),
+    id_classificacao   INT REFERENCES CLASSIFICACAO(id),
+    valor_total        DECIMAL(15, 2) NOT NULL,
+    data_emissao       DATE,
+    descricao_itens    TEXT,
+    numero_nota_fiscal VARCHAR(50),
+    ativo              BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 -- PARCELACONTAS: Parcelas de cada movimento
